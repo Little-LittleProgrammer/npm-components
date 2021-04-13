@@ -1,12 +1,22 @@
 <template>
   <div id="app">
+    <water-mark></water-mark>
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">下拉框</router-link> |
+      <router-link to="/Table">表格</router-link> |
+      <router-link to="/darg-to-recycle">拖拽致回收站</router-link> |
+      <router-link to="/image-zoom">图片放大器</router-link>
     </div>
     <router-view/>
   </div>
 </template>
+
+<script>
+import waterMark from '@/components/water-mark.vue'
+export default {
+  components: {waterMark}
+}
+</script>
 
 <style lang="scss">
 #app {
