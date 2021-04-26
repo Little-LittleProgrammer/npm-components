@@ -2,7 +2,7 @@
   <div>
     <img v-if="a1" src="../assets/images/1.jpg" alt="">
     <img v-if="a2" src="../assets/images/2.jpg" alt="">
-    <img v-if="a3" src="../assets/images/2.jpg" alt="">
+    <img v-if="a3" src="../assets/images/3.jpg" alt="">
     <img src="../assets/images/trash.jpg" alt="拖拽到此处以删除" title="拖拽到此处以删除">
   </div>
 </template>

@@ -2,16 +2,17 @@
     <div>
         <div class="qm-container">
             <div class="qm-select-header">
-                <input type="text" class="select-input"  v-model="searchData" :class="size" v-on:input="get_select" @focus="open_select_container" @blur="close_select_container">
+                <input type="text" :placeholder="placeholder" class="select-input"  v-model="searchData" :class="size" v-on:input="get_select" @focus="open_select_container" @blur="close_select_container">
                 <div class="select-tag" v-if="type==='multiple'">
                     <span v-if="selectVal.length >=1">{{selectVal[0].label}}</span>
                     <span v-if="selectVal.length>1">+{{selectVal.length-1}}</span>
                 </div>
                 <div class="clear-all" v-if="selectVal.length != 0 || searchData !=''" @click="clear_all"></div>
+                <div class="arrow-bottom" v-if="selectStyle.length !== 2 && selectVal.length === 0"></div>
             </div>
             <div class="qm-select-container" :class="selectStyle">
-                <div v-if="type === 'default'">
-                    <div v-if="selectAllList.length === 0" class="loading">
+                <div v-if="type === 'default' ">
+                    <div v-if="selectAllList.length === 0 && loading" class="loading">
                         <span v-for="item in 5" :key="item"></span>
                     </div>
                     <div v-else class="default-select">
@@ -21,7 +22,7 @@
                     </div>
                 </div>
                 <div v-else>
-                    <div v-if="selectAllList.length === 0" class="loading">
+                    <div v-if="selectAllList.length === 0 && loading" class="loading">
                         <span v-for="item in 5" :key="item"></span>
                     </div>
                     <div v-else>
@@ -81,12 +82,28 @@ export default {
         pageSize: { // 页面大小
             type: Number,
             default: 100
+        },
+        defaultCheckedList: { // 是否有默认选中值
+            type: Array,
+            default: () => []
+        },
+        num: {
+            type: Number,
+            default: 0
         }
     },
     watch: {
         selectAllList: {
             immediate: true,
             handler(val){
+                this.loading = true;
+                let timeOut = ''; // 当查询回来数据为空时，避免一直为loading图标
+                if (timeOut !== '' || timeOut !== undefined) {
+                    clearTimeout(timeOut);
+                }
+                timeOut = setTimeout(() => {
+                    this.loading = false;
+                }, 5000);
                 this.selectAllList = val;
                 if (this.async === 'sync') {
                     this._selectList = this.selectAllList;
@@ -94,6 +111,15 @@ export default {
                 } else {
                     if (this.scrollPageState.scrollPage === 0) this._selectList = this.selectAllList;
                     this.selectList = [...this.selectList, ...this.selectAllList];
+                }
+            }
+        },
+        defaultCheckedList: {
+            immediate: true,
+            handler(val) {
+                if (val && this.type === 'multiple') {
+                    this.placeholder = '';
+                    this.selectVal = this.defaultCheckedList;
                 }
             }
         }
@@ -110,7 +136,9 @@ export default {
             searchData: '',
             seleContainerStatus: false,
             animationFlag: false,
-            selectStyle: []
+            selectStyle: [],
+            loading: true,
+            placeholder: '请选择'
         };
     },
     mounted() {
@@ -136,17 +164,29 @@ export default {
                 this.listen_select_scroll();
             }
             if (this.type === 'multiple') {
+                document.addEventListener('mousedown', this.mouse_event);
                 this.set_input_left();
+            }
+        },
+        // 阻止焦点移除
+        mouse_event(e) {
+            console.log(e.target.offsetParent.className);
+            if (e.target.offsetParent.className.includes('qm-select-container') || e.target.offsetParent.className.includes('multiple-item') || e.target.offsetParent.className.includes('selected-item')) {
+                e.preventDefault();
             }
         },
         // 关闭搜索框
         close_select_container() {
+            this.seleContainerStatus = false;
+            this.selectStyle.splice(1, 1);
+            this.reset_select_list();
             if (this.type === 'default') {
-                this.seleContainerStatus = false;
-                this.selectStyle.splice(1, 1);
-                this.reset_select_list();
+                const $domAll = document.getElementsByClassName('default-select')[this.num];
+                $domAll.removeEventListener('scroll', this.listen_scroll);
             } else {
-                this.listen_mouse();
+                document.removeEventListener('mousedown', this.mouse_event);
+                const $domAll = document.getElementsByClassName('multiple-all')[this.num];
+                $domAll.removeEventListener('scroll', this.listen_scroll);
             }
         },
         // 已选择的样式
@@ -159,7 +199,7 @@ export default {
         },
         // 监听鼠标
         listen_mouse() {
-            const $dom = document.getElementsByClassName('qm-select-container')[0];
+            const $dom = document.getElementsByClassName('qm-select-container')[this.num];
             const mouse_leave_event = () => {
                 this.seleContainerStatus = false;
                 this.selectStyle.splice(1, 1);
@@ -174,16 +214,17 @@ export default {
         // 监听滚动事件
         listen_select_scroll() {
             if (this.type === 'default') {
-                const $domAll = document.getElementsByClassName('default-select')[0];
+                const $domAll = document.getElementsByClassName('default-select')[this.num];
                 $domAll.addEventListener('scroll', this.listen_scroll);
             } else {
-                const $domAll = document.getElementsByClassName('multiple-all')[0];
+                const $domAll = document.getElementsByClassName('multiple-all')[this.num];
                 $domAll.addEventListener('scroll', this.listen_scroll);
             }
         },
         // 往已选择框内推数据
         add_selected_list(item) {
             if (this.type === 'multiple') {
+                this.searchData = ''
                 const _index = this.selectVal.indexOf(item);
                 if (_index !== -1) {
                     this.selectVal.splice(_index, 1);
@@ -198,13 +239,16 @@ export default {
         },
         // 设置 input框的左距离
         set_input_left() {
-            const $dom = document.getElementsByClassName('select-input')[0];
+            const $dom = document.getElementsByClassName('select-input')[this.num];
             let num;
             if (this.selectVal.length > 1) {
-                num = 2.1;
+                this.placeholder = '';
+                num = 2.2;
             } else if (this.selectVal.length === 1) {
+                this.placeholder = '';
                 num = 1.3;
             } else if (this.selectVal.length === 0) {
+                this.placeholder = '请选择';
                 num = 0.1;
             }
             $dom.style.paddingLeft = num * 55 + 'px';
@@ -235,6 +279,7 @@ export default {
                     this.$emit('selectData', _searchVal);
                 }
                 this.scrollPageState.scrollPage = 0;
+                this.searchData = ''
                 if (this.async === 'sync') {
                     this._selectList = this.selectAllList;
                     this.selectList = this.selectAllList.slice(0, this.scrollPageState.pageSize);
@@ -245,13 +290,6 @@ export default {
         },
         // 监听scroll滚动
         listen_scroll(e) {
-            if (this.type === 'default') {
-                const $domAll = document.getElementsByClassName('default-select')[0];
-                $domAll.removeEventListener('mouseleave', this.listen_scroll);
-            } else {
-                const $domAll = document.getElementsByClassName('multiple-all')[0];
-                $domAll.removeEventListener('mouseleave', this.listen_scroll);
-            }
             if (this.scrollLock === true) {
                 return;
             }
@@ -378,21 +416,49 @@ export default {
     .clear-all {
         cursor: pointer;
         position: absolute;
+        color: white;
         border: 1px solid #ccc;
         border-radius: 50%;
         top: 50%;
         margin-top: -5px;
         right: 6px;
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         background-color: #ccc;
         &::after {
             position: absolute;
             content: 'x';
             font-size: 6px;
-            top: 3px;
-            left: 0.5px;
+            top: 4px;
+            left: 2px;
             line-height: 0;
+        }
+        &:hover {
+            background-color: rgb(140, 140, 140);
+        }
+    }
+    .arrow-bottom {
+        position: absolute;
+        top: 50%;
+        margin-top: -5px;
+        right: 6px;
+        width: 10px;
+        height: 10px;
+        &::before,
+        &::after {
+            position: absolute;
+            content: '';
+            top: 3px;
+            left: -8.5px;
+            width: 0px;
+            height: 0px;
+            line-height: 0;
+            border: 6px solid transparent;
+            border-top: 6px solid #ccc;
+        }
+        &::after {
+            top: 1px;
+            border-top: 6px solid #fff;
         }
     }
 }

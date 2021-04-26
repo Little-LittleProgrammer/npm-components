@@ -1,15 +1,3 @@
-<template>
-    <div :class="{ 'qm-watermark': $store.state.watermarkFlag }" v-show="$store.state.watermarkFlag">
-        <h1 v-for="item in 16" :key="'line'+item"><span v-for="i in 60" :key="'name'+i">{{$store.state.username}}</span></h1>
-    </div>
-</template>
-
-<script>
-export default {
-
-};
-</script>
-
 <style lang="scss" scoped>
     @keyframes watermark-enter { // 水印
         0% {
@@ -23,7 +11,6 @@ export default {
         }
     }
     .qm-watermark { // 水印
-        animation: watermark-enter 1s;
         position: fixed;
         z-index: 99999;
         top: 0;
@@ -32,7 +19,7 @@ export default {
         right: 0;
         pointer-events: none;
         opacity: 0.1;
-        font-size: 20px;
+        font-size: 14px;
         font-family: Cursive, serif;
         overflow: hidden;
         $e:17;
@@ -49,3 +36,35 @@ export default {
         }
     }
 </style>
+
+<template>
+    <div class="qm-watermark">
+        <h1 v-for="item in 16" :key="'line'+item"><span v-for="i in 60" :key="'name'+i">{{$store.state.username}}</span></h1>
+    </div>
+</template>
+
+<script>
+import Methods from '@/assets/js/tools.js'
+export default {
+    data() {
+        return {
+        }
+    },
+    mounted() {
+        let $dom = document.getElementsByClassName('qm-watermark')[0]
+        let option = {
+            width: document.documentElement.clientWidth, 
+            height: document.documentElement.clientHeight,
+            style: {
+                position: 'absolute',
+                zIndex: '999',
+                left: '0',
+                pointerEvents: 'none'
+            }
+        }
+        Methods.htmlTocanvas($dom, option)
+    }
+};
+</script>
+
+

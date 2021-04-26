@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- multiple -->
-    <big-select :selectAllList="list" type="default"></big-select>
+    <big-select :selectAllList="list" type="multiple" :defaultCheckedList="defaultCheckedList"></big-select>
   </div>
 </template>
 
@@ -16,10 +16,12 @@ export default {
   },
   data() {
     return {
-      list: []
+      list: [],
+      show:'',
+      defaultCheckedList: []
     }
   },
-  mounted() {
+  async mounted() {
     let _list = new Array(10000).fill(1)
     let _cache = _list.map(() => {
       let _num = this.getRandom(10)
@@ -27,8 +29,8 @@ export default {
     })
     setTimeout(()=> {
       this.list = _cache
+      this.defaultCheckedList = this.list.slice(0,166)
     },5000)
-    
   },
   methods: {
     getRandom(num){
@@ -38,3 +40,14 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.test-div {
+  width: 100px;
+  height: 100px;
+  background-color: #000;
+  .test-span {
+    color: red;
+  }
+}
+</style>

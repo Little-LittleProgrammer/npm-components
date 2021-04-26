@@ -34,6 +34,16 @@ const routes = [
     name: 'ImageZoom',
     component: () => import(/* webpackChunkName: "about" */ '../views/image-zoom.vue')
   },
+  {
+    path: '/qm-swiper',
+    name: 'QmSwiper',
+    component: () => import(/* webpackChunkName: "about" */ '../views/qm-swiper.vue')
+  },
+  {
+    path: '/qm-swiper-app',
+    name: 'QmSwiperApp',
+    component: () => import(/* webpackChunkName: "about" */ '../views/qm-swiper-app.vue')
+  },
 ]
 
 const router = new VueRouter({

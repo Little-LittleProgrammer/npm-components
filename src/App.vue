@@ -5,7 +5,9 @@
       <router-link to="/">下拉框</router-link> |
       <router-link to="/Table">表格</router-link> |
       <router-link to="/darg-to-recycle">拖拽致回收站</router-link> |
-      <router-link to="/image-zoom">图片放大器</router-link>
+      <router-link to="/image-zoom">图片放大器</router-link> | 
+      <router-link to="/qm-swiper">轮播图</router-link> | 
+      <router-link to="/qm-swiper-app">移动端</router-link>
     </div>
     <router-view/>
   </div>
@@ -37,6 +39,12 @@ export default {
     &.router-link-exact-active {
       color: #42b983;
     }
+  }
+}
+
+@media screen and ( max-width: 375px) {
+  html {
+    font-size: 0.26666vw;
   }
 }
 </style>
