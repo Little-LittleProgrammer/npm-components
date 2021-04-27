@@ -140,7 +140,7 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="scss" scoped>
   [v-cloak]{
     display: none;
   }

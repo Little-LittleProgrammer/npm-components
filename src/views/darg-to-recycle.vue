@@ -44,8 +44,8 @@ export default {
 }
 </script>
 
-<style>
-  img {
+<style lang="scss" scoped>
+ img {
     width: 200px;
     height: 300px;
   }
