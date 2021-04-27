@@ -1,5 +1,5 @@
 <template>
-  <qm-swiper swiperStyle="y" :imgList="imgList" width="800"></qm-swiper>
+  <qm-swiper swiperStyle="x" :imgList="imgList" width="800"></qm-swiper>
 </template>
 
 <script>
