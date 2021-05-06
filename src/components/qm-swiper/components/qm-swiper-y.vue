@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import methods from '@/assets/js/tools'
 export default {
     props: {
         width: { // 容器宽度
@@ -158,7 +159,9 @@ export default {
         },
         mouse_move(e) { // 鼠标移动事件，设置图片移动距离
             const _height = this.container.clientHeight
-            this.boxs.style.top = (-this.index * _height + e.clientY - this.startY) + 'px';
+            methods.css(this.boxs, {
+                transform: `translateY(${(-this.index * _height + e.clientY - this.startY)}px)`,
+            })
         },
         left(){ // 左箭头点击事件
             // 关闭定时器
@@ -181,7 +184,9 @@ export default {
         },
         animate_img(fn){ // 底部span切换
             const _height = this.container.clientHeight
-            this.boxs.style.top = (-this.index * _height) + 'px';
+            methods.css(this.boxs, {
+                transform: `translateY(${(-this.index * _height)}px)`,
+            })
             for (let i = 0; i < this.smallBtn.length; i++) {
                 if (i === +this.index) {
                     this.smallBtn[i].setAttribute('class','choose')
@@ -228,7 +233,7 @@ export default {
     overflow: hidden;
     background-color: #ccc;
     .lunbo{
-        top: 0;
+        transform: translateY(0);
         transition: all .5s;
         background-color: #ccc;
         position: absolute;

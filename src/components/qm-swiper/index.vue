@@ -1,7 +1,7 @@
 <template>
   <div>
       <template v-if="swiperStyle === 'x'">
-          <qm-Swiper-x :imgList="imgList" :lunboTime="lunboTime" :width="width"></qm-Swiper-x>
+          <qm-Swiper-x :imgList="imgList" :lunboTime="lunboTime" :width="width" :lunboType="lunboType"></qm-Swiper-x>
       </template>
       <template v-else-if="swiperStyle === 'y'">
           <qm-Swiper-y :imgList="imgList" :lunboTime="lunboTime" :width="width"></qm-Swiper-y>
@@ -33,6 +33,10 @@ export default {
         },
         imgList: { // 图片列表
             type: Array
+        },
+        lunboType: {
+            type: String,
+            default: 'default'
         }
     }
 }

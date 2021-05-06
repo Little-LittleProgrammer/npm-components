@@ -1,5 +1,4 @@
-let Methods = (function () {
-    let methods = {};
+   let methods = {};
     /**
      * 基于操作的节流器
      * @param {*} fn 执行的函数
@@ -110,8 +109,8 @@ let Methods = (function () {
         })
         // 遮罩层
         methods.css(mask, {
-            width: width / 2 + 'px',
-            height: height / 2 + 'px',
+            width: width / 4 + 'px',
+            height: height / 4 + 'px',
             position: 'absolute',
             top: 0,
             left: 0,
@@ -128,7 +127,7 @@ let Methods = (function () {
             top: 0,
             left: '100%',
             background: 'url(' + url + ')' + ' ' + 'no-repeat',
-            backgroundSize: '200%',
+            backgroundSize: '400%',
             border: '1px solid #ccc',
             display: 'none'
         })
@@ -142,8 +141,8 @@ let Methods = (function () {
         // 修改big样式
         function changeBigStyle(x, y) {
             methods.css(big, {
-                backgroundPositionX: x * -2 + 'px',
-                backgroundPositionY: y * -2 + 'px',
+                backgroundPositionX: x * -4 + 'px',
+                backgroundPositionY: y * -4 + 'px',
             })
         }
         function demo(e) {
@@ -152,20 +151,20 @@ let Methods = (function () {
             let y = e.pageY - positonByHtml.top;
             // console.log(x,y)
             //将中心点变成顶点
-            x -= width / 4;
-            y -= height / 4;
+            x -= width / 8;
+            y -= height / 8;
             // 边界处理
             if (x < 0) {
                 x = 0;
-                // 宽度超出右边框
-            } else if (x > width / 2) {
-                x = width / 2;
+                // 宽度超出右边框 
+            } else if (x > width * 3 / 4) {
+                x = width * 3 / 4;
             }
             if (y < 0) {
                 y = 0;
                 // 高度超出右边框
-            } else if (y > height / 2) {
-                y = height / 2;
+            } else if (y > height * 3 / 4) {
+                y = height * 3 / 4;
             }
             // 设置样式
             methods.throttle(function () {
@@ -655,7 +654,4 @@ let Methods = (function () {
         init_main()
     }
 
-    return methods;
-})()
-
-export default Methods;
+export default methods;

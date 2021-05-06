@@ -1,16 +1,18 @@
 <template>
-    <div class="container" :class="containerWidth" :style="containerHeight">
-        <div class="lunbo" @mousedown="mouse_down" @mousewheel="mouse_wheel">
-            <img :style="containerHeight" v-for="item in imgList" :key="item.key" :src="item.url" alt="" @mousedown="(e) => e.preventDefault()">
-        </div>
-        <span class="left" @click="left">
-            <iconLeftArrow/>
-        </span>
-        <span class="right" @click="right">
-            <iconRightArrow/>
-        </span>
-        <div class="smallBtn" @click="change_img">
-            <span v-for="item in imgList" :key="item.key" :id="item.key"></span>
+    <div class="movie-container">
+        <div class="container" :class="containerWidth" :style="containerHeight">
+            <div class="lunbo" @mousedown="mouse_down" @mousewheel="mouse_wheel">
+                <img :style="containerHeight" v-for="item in imgList" :key="item.key" :src="item.url" alt="" @mousedown="(e) => e.preventDefault()">
+            </div>
+            <span class="left" @click="left">
+                <iconLeftArrow/>
+            </span>
+            <span class="right" @click="right">
+                <iconRightArrow/>
+            </span>
+            <div class="smallBtn" @click="change_img">
+                <span v-for="item in imgList" :key="item.key" :id="item.key"></span>
+            </div>
         </div>
     </div>
 </template>
@@ -18,6 +20,7 @@
 <script>
 import iconLeftArrow from '@/components/vue-icon/icon-left-arrow'
 import iconRightArrow from '@/components/vue-icon/icon-right-arrow'
+import methods from '@/assets/js/tools'
 export default {
     components: { iconLeftArrow, iconRightArrow },
     props: {
@@ -31,10 +34,12 @@ export default {
         // },
         lunboTime: { // 轮播时间 为null时，不轮播
             type: Number,
-            default: 3000
         },
         imgList: { // 图片列表
             type: Array
+        },
+        lunboType: { // 展示模式 defalut，正常模式，movie：电影院模式
+            type: String,
         }
     },
     data() {
@@ -46,7 +51,7 @@ export default {
             startX:0, // 鼠标按下去的记录点
             endX:0, // 鼠标松掉的记录点
             containerWidth: '', // 容器宽度值
-            containerHeight: '' // 容器高度值
+            containerHeight: '', // 容器高度值,
         }
     },
     watch: {
@@ -63,6 +68,18 @@ export default {
                         if (this.lunboTime !== null) {
                             this.start_time()
                         } 
+                        console.log(methods)
+                        if (this.lunboType === 'moive') {
+                            const $movieContaner = document.querySelector('.movie-container')
+                            methods.css($movieContaner, {
+                                width: '100%',
+                                overflow:'hidden'
+                            })
+                            methods.css(this.container, {
+                                backgroundColor: 'transparent',
+                                overflow: 'visible'
+                            })
+                        }
                     })
                 }
             }
@@ -127,16 +144,20 @@ export default {
         // 鼠标按下事件
         mouse_down(e) {
             this.clear_interval() // 清空定时器
-            this.boxs.style.transition = 'none' // 将动画清掉，以避免鼠标移动时卡顿
+            methods.css(this.boxs, {
+                transition: 'none',
+            }) // 将动画清掉，以避免鼠标移动时卡顿
             this.startX = e.clientX; // 记录开始位置
             this.boxs.addEventListener('mousemove', this.mouse_move); // 移动监听
             document.addEventListener('mouseup', this.mouse_up); // 鼠标谈起监听
         },
         // 鼠标弹起事件
         mouse_up(e) { 
-            const _width = this.container.clientWidth
+            const _width = 800
             this.endX = e.clientX; // 记录最终位置
-            this.boxs.style.transition = 'all .5s' // 动画恢复
+            methods.css(this.boxs, {
+                transition: 'all .5s',
+            }) // 动画恢复
             if (this.endX - this.startX <= -(_width / 2)) { // 如果最终位置-开始位置大于图片的一半，则切换图片
                 this.index++;
                 if(this.index >= this.imgList.length){
@@ -156,8 +177,16 @@ export default {
             document.removeEventListener('mouseup', this.mouse_up); // 移除鼠标弹起事件
         },
         mouse_move(e) { // 鼠标移动事件，设置图片移动距离
-            const _width = this.container.clientWidth
-            this.boxs.style.left = (-this.index * _width + e.clientX - this.startX) + 'px';
+            const _width = 800
+            if (this.lunboType === 'moive') {
+                methods.css(this.boxs, {
+                    transform: `translateX(${(-this.index * _width + e.clientX - this.startX)}px)`,
+                })
+            } else if (this.lunboType === 'default') {
+                methods.css(this.boxs, {
+                    transform: `translateX(${(-this.index * _width  + e.clientX - this.startX)}px)`,
+                })
+            }
         },
         left(){ // 左箭头点击事件
             // 关闭定时器
@@ -179,12 +208,33 @@ export default {
             this.animate_img(this.start_time)
         },
         animate_img(fn){ // 底部span切换
-            const _width = this.container.clientWidth
-            this.boxs.style.left = (-this.index * _width) + 'px';
+            const _width = 800
+            methods.css(this.boxs, {
+                transform: `translateX(${((-this.index * _width))}px)`,
+            })
             for (let i = 0; i < this.smallBtn.length; i++) {
                 if (i === +this.index) {
+                    if (this.lunboType === 'moive') {
+                        methods.css(this.boxs.children[i], {
+                            transform: 'rotateY(0deg)',
+                            transformOrigin: '0'
+                        })
+                    }
                     this.smallBtn[i].setAttribute('class','choose')
                 } else {
+                    if (this.lunboType === 'moive') {
+                        if (i < +this.index) {
+                            methods.css(this.boxs.children[i], {
+                                transform: 'rotateY(-45deg)',
+                                transformOrigin: '100%'
+                            })
+                        } else {
+                            methods.css(this.boxs.children[i], {
+                                transform: 'rotateY(45deg)',
+                                transformOrigin: '0'
+                            })
+                        }
+                    }
                     this.smallBtn[i].setAttribute('class', '')
                 }
             }
@@ -227,11 +277,17 @@ export default {
     overflow: hidden;
     background-color: #ccc;
     .lunbo{
-        left: 0;
+        transform: translateX(0px);
         transition: all .5s;
-        background-color: #ccc;
         position: absolute;
         display: flex;
+        align-items: flex-end;
+        overflow: visible;
+        transform-style: preserve-3d; 
+        perspective: 3000px;
+        img {  
+            transition: all .5s;
+        }
     }
     .left,
     .right{
