@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import QmSwiperX from '@/components/qm-swiper/components/qm-swiper-x'
+import QmSwiperX from '@/components/qm-swiper/components/qm-swiper-x copy'
 import QmSwiperY from '@/components/qm-swiper/components/qm-swiper-y'
 export default {
     components: { QmSwiperX, QmSwiperY },

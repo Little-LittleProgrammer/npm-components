@@ -1,5 +1,5 @@
 <template>
-  <qm-swiper swiperStyle="x" :imgList="imgList" :lunboTime="null" lunboType="moive" width="800"></qm-swiper>
+  <qm-swiper swiperStyle="x" :imgList="imgList" lunboType="moive" width="800"></qm-swiper>
 </template>
 
 <script>
