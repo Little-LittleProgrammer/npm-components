@@ -1,63 +1,62 @@
 <template>
-    <div>
-        <div class="qm-container">
-            <div class="qm-select-header">
-                <input type="text" :placeholder="placeholder" class="select-input"  v-model="searchData" :class="size" v-on:input="get_select" @focus="open_select_container" @blur="close_select_container">
-                <div class="select-tag" v-if="type==='multiple'">
-                    <span v-if="selectVal.length >=1">{{selectVal[0].label}}</span>
-                    <span v-if="selectVal.length>1">+{{selectVal.length-1}}</span>
-                </div>
-                <div class="clear-all" v-if="selectVal.length != 0 || searchData !=''" @click="clear_all"></div>
-                <div class="arrow-bottom" v-if="selectStyle.length !== 2 && selectVal.length === 0"></div>
+    <div class="qm-container">
+        <div class="qm-select-header">
+            <input type="text" :placeholder="placeholder" class="select-input"  v-model="searchData" :class="size" v-on:input="get_select" @focus="open_select_container" @blur="close_select_container">
+            <div class="select-tag" v-if="type==='multiple'">
+                <span v-if="selectVal.length >=1">{{selectVal[0].label}}</span>
+                <span v-if="selectVal.length>1">+{{selectVal.length-1}}</span>
             </div>
-            <div class="qm-select-container" :class="selectStyle">
-                <div v-if="type === 'default' ">
-                    <div v-if="selectAllList.length === 0 && loading" class="loading">
-                        <span v-for="item in 5" :key="item"></span>
+            <div class="clear-all" v-if="selectVal.length != 0 || searchData !=''" @click="clear_all"></div>
+            <div class="arrow-bottom" v-if="selectStyle.length !== 2 && selectVal.length === 0"></div>
+        </div>
+        <div class="qm-select-container" :class="selectStyle">
+            <div v-if="type === 'default' ">
+                <div v-if="selectAllList.length === 0 && loading" class="loading">
+                    <span v-for="item in 5" :key="item"></span>
+                </div>
+                <div v-else class="default-select">
+                    <div v-for="(item,index) in selectList" :key="index" class="default-item" :class="{choose:chooseItem(item)}" @mousedown="add_selected_list(item)">
+                        <span>{{item.label}}</span>
                     </div>
-                    <div v-else class="default-select">
-                        <div v-for="(item,index) in selectList" :key="index" class="default-item" :class="{choose:chooseItem(item)}" @mousedown="add_selected_list(item)">
-                            <span>{{item.label}}</span>
-                        </div>
-                    </div>
+                </div>
+            </div>
+            <div v-else>
+                <div v-if="selectAllList.length === 0 && loading" class="loading">
+                    <span v-for="item in 5" :key="item"></span>
                 </div>
                 <div v-else>
-                    <div v-if="selectAllList.length === 0 && loading" class="loading">
-                        <span v-for="item in 5" :key="item"></span>
+                    <div class="multiple-title">
+                        <span>全部选项列表</span>
+                        <span></span>
+                        <span>已选择选项列表</span>
                     </div>
-                    <div v-else>
-                        <div class="multiple-title">
-                            <span>全部选项列表</span>
-                            <span></span>
-                            <span>已选择选项列表</span>
+                    <div class="select-multiple">
+                        <div class="multiple-all">
+                            <div v-for="(item,index) in selectList" :key="index" class="multiple-item" :class="{choose:chooseItem(item)}" @click="add_selected_list(item)">
+                                <span>{{item.label}}</span>
+                                <span class="icon" v-if="chooseItem(item)">&#10003;</span>
+                            </div>
                         </div>
-                        <div class="select-multiple">
-                            <div class="multiple-all">
-                                <div v-for="(item,index) in selectList" :key="index" class="multiple-item" :class="{choose:chooseItem(item)}" @click="add_selected_list(item)">
-                                    <span>{{item.label}}</span>
-                                    <span class="icon" v-if="chooseItem(item)">&#10003;</span>
-                                </div>
-                            </div>
-                            <div class="multiple-middle">
-                                <!-- <button>全选</button> -->
-                                &#8644;
-                            </div>
-                            <div class="multiple-selected">
-                                <div v-for="(item, index) in selectVal" :key="index" class="selected-item" @click="cancel_check(item)">
-                                    <span>{{item.label}}</span>
-                                    <span class="icon">&#10003;</span>
-                                </div>
+                        <div class="multiple-middle">
+                            <!-- <button>全选</button> -->
+                            &#8644;
+                        </div>
+                        <div class="multiple-selected">
+                            <div v-for="(item, index) in selectVal" :key="index" class="selected-item" @click="cancel_check(item)">
+                                <span>{{item.label}}</span>
+                                <span class="icon">&#10003;</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
+
         </div>
     </div>
 </template>
 
 <script>
+import methods from '@/assets/js/tools'
 export default {
     name: 'QmSelectBigData',
     props: {
@@ -97,6 +96,7 @@ export default {
             immediate: true,
             handler(val){
                 this.loading = true;
+                console.log(val)
                 let timeOut = ''; // 当查询回来数据为空时，避免一直为loading图标
                 if (timeOut !== '' || timeOut !== undefined) {
                     clearTimeout(timeOut);
@@ -105,10 +105,10 @@ export default {
                     this.loading = false;
                 }, 5000);
                 this.selectAllList = val;
-                if (this.async === 'sync') {
+                if (this.async === 'sync') { // 同步时的方法
                     this._selectList = this.selectAllList;
                     this.selectList = this.selectAllList.slice(0, this.scrollPageState.pageSize);
-                } else {
+                } else { // 异步时的方法
                     if (this.scrollPageState.scrollPage === 0) this._selectList = this.selectAllList;
                     this.selectList = [...this.selectList, ...this.selectAllList];
                 }
@@ -126,11 +126,11 @@ export default {
     },
     data() {
         return {
-            scrollPageState: {
+            scrollPageState: { // 判断分页的
                 scrollPage: 0,
                 pageSize: 100
             },
-            scrollLock: false,
+            scrollLock: false, // 
             selectList: [],
             selectVal: '' || [],
             searchData: '',
@@ -143,6 +143,17 @@ export default {
     },
     mounted() {
         this.scrollPageState.pageSize = this.pageSize;
+        for (let i =0; i<= this.num; i++) { // 当下拉框在最右侧时，避免超出屏幕, 当同一页面使用多个下拉框时
+            const $dom = document.getElementsByClassName('qm-container')[i];
+            const $domSelect = document.getElementsByClassName('qm-select-container')[i]; 
+            const _resurt = methods.offset($dom);
+            console.log(document.documentElement.clientWidth - _resurt.left);
+            if (document.documentElement.clientWidth - _resurt.left < 500) {
+                $domSelect.style.right = 0;
+            } else {
+                $domSelect.style.left = 0;
+            }
+        }
         if (this.async === 'async') {
             this.$emit('findSelectList', this.scrollPageState.scrollPage, this.searchData);
         }
@@ -156,6 +167,7 @@ export default {
         }
     },
     methods: {
+
         // 打开搜索框
         open_select_container() {
             this.seleContainerStatus = true;
@@ -168,27 +180,34 @@ export default {
                 this.set_input_left();
             }
         },
+
         // 阻止焦点移除
         mouse_event(e) {
-            console.log(e.target.offsetParent.className);
+            // 针对这块，千万不要将类名命名重名
             if (e.target.offsetParent.className.includes('qm-select-container') || e.target.offsetParent.className.includes('multiple-item') || e.target.offsetParent.className.includes('selected-item')) {
                 e.preventDefault();
             }
         },
+
         // 关闭搜索框
         close_select_container() {
             this.seleContainerStatus = false;
             this.selectStyle.splice(1, 1);
             this.reset_select_list();
             if (this.type === 'default') {
-                const $domAll = document.getElementsByClassName('default-select')[this.num];
-                $domAll.removeEventListener('scroll', this.listen_scroll);
+                if (this.selectAllList.length !==0) {
+                    const $domAll = document.getElementsByClassName('default-select')[this.num];
+                    $domAll.removeEventListener('scroll', this.listen_scroll);
+                }
             } else {
                 document.removeEventListener('mousedown', this.mouse_event);
-                const $domAll = document.getElementsByClassName('multiple-all')[this.num];
-                $domAll.removeEventListener('scroll', this.listen_scroll);
+                if (this.selectAllList.length !==0) {
+                    const $domAll = document.getElementsByClassName('multiple-all')[this.num];
+                    $domAll.removeEventListener('scroll', this.listen_scroll);
+                }
             }
         },
+
         // 已选择的样式
         chooseItem(item) {
             if (this.type === 'multiple') {
@@ -197,6 +216,7 @@ export default {
                 return this.selectVal === item;
             }
         },
+
         // 监听鼠标
         listen_mouse() {
             const $dom = document.getElementsByClassName('qm-select-container')[this.num];
@@ -211,6 +231,7 @@ export default {
             };
             $dom.addEventListener('mouseleave', mouse_leave_event);
         },
+
         // 监听滚动事件
         listen_select_scroll() {
             if (this.type === 'default') {
@@ -221,6 +242,7 @@ export default {
                 $domAll.addEventListener('scroll', this.listen_scroll);
             }
         },
+
         // 往已选择框内推数据
         add_selected_list(item) {
             if (this.type === 'multiple') {
@@ -237,13 +259,14 @@ export default {
                 this.searchData = item.label;
             }
         },
+
         // 设置 input框的左距离
         set_input_left() {
             const $dom = document.getElementsByClassName('select-input')[this.num];
             let num;
             if (this.selectVal.length > 1) {
                 this.placeholder = '';
-                num = 2.2;
+                num = 2.3;
             } else if (this.selectVal.length === 1) {
                 this.placeholder = '';
                 num = 1.3;
@@ -253,6 +276,7 @@ export default {
             }
             $dom.style.paddingLeft = num * 55 + 'px';
         },
+
         // 搜索
         async get_select(e) {
             this.searchData = e.target.value;
@@ -268,6 +292,7 @@ export default {
                 this.selectList = this.selectAllList.slice(0, this.scrollPageState.pageSize);
             }
         },
+
         // 失去焦点时，重置下拉框
         reset_select_list() {
             this.$nextTick(() => {
@@ -288,6 +313,7 @@ export default {
                 }
             });
         },
+
         // 监听scroll滚动
         listen_scroll(e) {
             if (this.scrollLock === true) {
@@ -300,6 +326,7 @@ export default {
                 this.change_scroll(target);
             });
         },
+
         // 当监测到下拉框下拉到底部时，push新的数据
         change_scroll(target) {
             if (target.clientHeight > target.scrollHeight - target.scrollTop - 20) {
@@ -311,6 +338,7 @@ export default {
                 }
             }
         },
+
         // 以选择框删除
         cancel_check(item) {
             for (let i = this.selectVal.length - 1; i >= 0; i--) {
@@ -320,6 +348,7 @@ export default {
             }
             this.set_input_left();
         },
+
         // 清空所有数据
         clear_all() {
             this.selectVal = [];
@@ -330,6 +359,7 @@ export default {
                 this.$emit('selectData', this.selectVal);
             }
         }
+        
     }
 };
 </script>
@@ -519,6 +549,7 @@ export default {
         }
     }
     .select-multiple {
+        margin:0 0 5px 5px;
         display: flex;
         .multiple-all,
         .multiple-selected,

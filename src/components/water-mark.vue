@@ -1,3 +1,33 @@
+<template>
+    <div class="qm-watermark">
+        <h1 v-for="item in 16" :key="'line'+item"><span v-for="i in 60" :key="'name'+i">{{$store.state.username}}</span></h1>
+    </div>
+</template>
+
+<script>
+import Methods from '@/assets/js/tools.js'
+export default {
+    data() {
+        return {
+        }
+    },
+    mounted() {
+        let $dom = document.getElementsByClassName('qm-watermark')[0]
+        let option = {
+            width: document.documentElement.clientWidth, 
+            height: document.documentElement.clientHeight,
+            style: {
+                position: 'absolute',
+                zIndex: '999',
+                left: '0',
+                pointerEvents: 'none',
+            }
+        }
+        Methods.htmlTocanvas($dom, option)
+    }
+};
+</script>
+
 <style lang="scss" scoped>
     @keyframes watermark-enter { // 水印
         0% {
@@ -36,35 +66,3 @@
         }
     }
 </style>
-
-<template>
-    <div class="qm-watermark">
-        <h1 v-for="item in 16" :key="'line'+item"><span v-for="i in 60" :key="'name'+i">{{$store.state.username}}</span></h1>
-    </div>
-</template>
-
-<script>
-import Methods from '@/assets/js/tools.js'
-export default {
-    data() {
-        return {
-        }
-    },
-    mounted() {
-        let $dom = document.getElementsByClassName('qm-watermark')[0]
-        let option = {
-            width: document.documentElement.clientWidth, 
-            height: document.documentElement.clientHeight,
-            style: {
-                position: 'absolute',
-                zIndex: '999',
-                left: '0',
-                pointerEvents: 'none'
-            }
-        }
-        Methods.htmlTocanvas($dom, option)
-    }
-};
-</script>
-
-

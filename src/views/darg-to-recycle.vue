@@ -26,7 +26,7 @@ export default {
       // 为所有元素绑定事件按
       for (let i = 0; i < imgs.length; i++) {
           imgs[i].ondragstart = function(e) {
-              e.dataTransfer.setData('domId', i+1)
+              e.dataTransfer.setData('domId', i)
           }
       }
       // 丢弃到垃圾桶

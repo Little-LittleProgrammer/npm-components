@@ -262,8 +262,9 @@ export default {
     .h-p-#{$i} {
         height: unquote($i+'%');
     }
-}
+} 
 .container{
+    contain: layout; // 性能优化，告诉计算机这个元素不会营影响到外面元素的重绘回流
     position: relative;
     margin: 0 auto;
     background-color: #ccc;

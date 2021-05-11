@@ -1,7 +1,8 @@
 <template>
   <div class="home">
     <!-- multiple -->
-    <big-select :selectAllList="list" type="multiple" :defaultCheckedList="defaultCheckedList"></big-select>
+    <big-select :selectAllList="list" type="multiple" :defaultCheckedList="defaultCheckedList" :num="0"></big-select>
+    
   </div>
 </template>
 

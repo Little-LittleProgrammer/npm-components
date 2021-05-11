@@ -583,6 +583,7 @@
      * 将html代码转化为图片
      * @param {*} dom dom元素
      * @param {*} options 配置  宽高：width， height， canvas样式：style
+     * @description 缺陷 无法设置background-image
      */
     methods.htmlTocanvas = (dom, options) => {
         options = Object.assign({ width: 100, height: 100, style: {}}, options)
@@ -590,7 +591,6 @@
         $canvas.id = 'canvas';
         $canvas.width = options.width;
         $canvas.height = options.height;
-        $canvas.setAttribute('style', 'display: block !important');
         if (JSON.stringify(options.style) !== '{}') {
             for (let key in options.style) {
                 methods.css($canvas, `${key}`, `${options.style[key]}`)
@@ -598,13 +598,28 @@
         }
         let ctx = $canvas.getContext('2d');
 
-        function init_main() {
-            let data = get_svg_dom_string(dom);
+        let observer = new MutationObserver(function(mutations) { // 监听css变化, 防止去除canvas标签
+            mutations.forEach(function(mutation) {
+                if (mutation.type == "attributes") {
+                    console.log("css changed", mutation);
+                    $canvas.style.display = 'block'
+                    $canvas.style.opacity = '1'
+                    $canvas.style.visibility = 'visible'
+                }
+            });
+        });
+        observer.observe($canvas, {
+            attributes: true, // 将其配置为侦听属性更改,
+            attributeFilter: ['style'] // 监听style属性
+        })
+
+        async function init_main() {
+            let data = await get_svg_dom_string(dom);
             let DOMURL = window.URL || window.webkitURL || window;
             let img = new Image();
             let svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
             let url = DOMURL.createObjectURL(svg);
-            $canvas.setAttribute('crossorigin', 'Anonymous')
+            $canvas.setAttribute('crossorigin', 'Anonymous') // 设置跨域
             img.src = url
             img.onload = function () {
                 ctx.drawImage(img, 0, 0);
@@ -615,30 +630,45 @@
             }
         }
 
-        function get_svg_dom_string(element) {
+        async function get_svg_dom_string(element) {
+            let $dom = await render_dom(element, true)
             return `
                 <svg xmlns="http://www.w3.org/2000/svg" width = "${options.width}" height = "${options.height}">
                     <foreignObject width="100%" height="100%">
-                         ${render_dom(element, true)}
+                         ${$dom}
                     </foreignObject>\n
                 </svg>
             `;
-        }
+        } 
 
-        function render_dom(element, isTop) {
+        async function render_dom(element, isTop) { // 递归调用获取子标签
             let tag = element.tagName.toLowerCase();
             let str = `<${tag} `
+            let flag = true
             // 最外层的节点要加xmlns命名空间
             isTop && (str += `xmlns="http://www.w3.org/1999/xhtml" `);
-            str += `style="${get_element_styles(element)}">\n`;
+            if (str === '<img ') {
+                flag = false
+                let base64Img = ''
+                if (element.src.length > 30000) {
+                    base64Img = element.src
+                } else {
+                    base64Img = await getBase64Image(element.src)
+                }
+                str += `src="${base64Img}" style="${get_element_styles(element)}" />\n`;
+            } else {
+                str += `style="${get_element_styles(element)}">\n`;
+            }
             if (element.children.length) {
                 for (let el of element.children) {
-                    str += render_dom(el)
+                    str += await render_dom(el)
                 }
             } else {
                 str += element.innerHTML;
             }
-            str += `</${tag}>\n`;
+            if (flag) {
+                str += `</${tag}>\n`;
+            }
             return str;
         }
 
@@ -650,6 +680,25 @@
             }
             return style;
         }
+
+        function getBase64Image(img) {  
+            let image = new Image();  
+            image.src = img;  
+            return new Promise(resolve => {
+                image.onload = function(){
+                    let canvas = document.createElement("canvas"); 
+                    canvas.id = 'image';  
+                    canvas.width = image.width;  
+                    canvas.height = image.height;  
+                    let ctxImg = canvas.getContext("2d");  
+                    ctxImg.drawImage(image, 0, 0, image.width, image.height);  
+                    let ext = image.src.substring(image.src.lastIndexOf(".")+1).toLowerCase();  
+                    let dataURL = canvas.toDataURL("image/"+ext);
+                    resolve(dataURL) 
+                }
+            })
+            
+       }  
 
         init_main()
     }
