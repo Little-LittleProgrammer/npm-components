@@ -9,8 +9,9 @@
         <router-link to="/">下拉框</router-link> |
         <router-link to="/waterMark">水印图</router-link> |
         <router-link to="/darg-to-recycle">拖拽致回收站</router-link> |
-        <router-link to="/image-zoom">图片放大器</router-link> | 
-        <router-link to="/qm-swiper">轮播图</router-link> | 
+        <router-link to="/image-zoom">图片放大器</router-link> |
+        <router-link to="/skeleton">骨架屏</router-link> |
+        <router-link to="/qm-swiper">轮播图</router-link> |
         <router-link to="/qm-swiper-app">移动端</router-link>
       </div>
     </div>
@@ -19,10 +20,10 @@
 </template>
 
 <script>
-import waterMark from '@/components/water-mark.vue'
+import waterMark from '@/components/water-mark.vue';
 export default {
-  components: {waterMark}
-}
+    components: {waterMark}
+};
 </script>
 
 <style lang="scss">
@@ -64,7 +65,6 @@ export default {
     }
   }
 }
-
 
 @media screen and ( max-width: 375px) {
   html {

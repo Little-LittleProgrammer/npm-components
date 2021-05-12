@@ -16,42 +16,42 @@
 </template>
 
 <script>
-import Methods from '@/assets/js/tools.js'
+import Methods from '@/assets/js/tools.js';
 export default {
     data() {
         return {
-            imgUrl:'',
+            imgUrl: '',
             username: ''
-        }
+        };
     },
     mounted() {
-        
+
     },
     methods: {
         get_file_data(data) {
-                const fileReader = new FileReader()
-                fileReader.onload = (e) => {
-                    this.imgUrl = e.target.result
-                }
-                // readAsDataURL
-                fileReader.readAsDataURL(data.target.files[0])
-                fileReader.onerror = () => {
-                    new Error('blobToBase64 error')
-                }
+            const fileReader = new FileReader();
+            fileReader.onload = (e) => {
+                this.imgUrl = e.target.result;
+            };
+            // readAsDataURL
+            fileReader.readAsDataURL(data.target.files[0]);
+            fileReader.onerror = () => {
+                new Error('blobToBase64 error');
+            };
         },
         async get_img() {
-            let $dom = document.getElementsByClassName('img-container')[0]
-            let option = {
+            const $dom = document.getElementsByClassName('img-container')[0];
+            const option = {
                 width: $dom.clientWidth,
                 height: $dom.clientHeight,
                 style: {
                     margin: '0 auto'
                 }
-            }
-            Methods.htmlTocanvas($dom, option)
+            };
+            Methods.htmlTocanvas($dom, option);
         }
     }
-}
+};
 </script>
 
 <style lang="scss" scoped>

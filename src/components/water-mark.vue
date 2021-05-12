@@ -5,25 +5,25 @@
 </template>
 
 <script>
-import Methods from '@/assets/js/tools.js'
+import Methods from '@/assets/js/tools.js';
 export default {
     data() {
         return {
-        }
+        };
     },
     mounted() {
-        let $dom = document.getElementsByClassName('qm-watermark')[0]
-        let option = {
-            width: document.documentElement.clientWidth, 
+        const $dom = document.getElementsByClassName('qm-watermark')[0];
+        const option = { // 配置canvas的样式
+            width: document.documentElement.clientWidth,
             height: document.documentElement.clientHeight,
             style: {
                 position: 'absolute',
                 zIndex: '999',
                 left: '0',
-                pointerEvents: 'none',
+                pointerEvents: 'none'
             }
-        }
-        Methods.htmlTocanvas($dom, option)
+        };
+        Methods.htmlTocanvas($dom, option);
     }
 };
 </script>
