@@ -85,115 +85,6 @@ methods.css = function(dom, key, value) {
 };
 
 /**
-     * // 京东放大器
-     *
-     * @param {*} dom 元素
-     * @param {*} url 图片地址
-     * @param {*} width 宽
-     * @param {*} height 高
-     */
-methods.imageZoom = function(dom, url, width, height) {
-    // 创建图片的方式：1、new Image 2、document.createElement('img')
-    const mask = document.createElement('div');
-    const big = document.createElement('div');
-    dom.appendChild(mask);
-    dom.appendChild(big);
-    methods.css(dom, {
-        width: width + 'px',
-        height: height + 'px',
-        position: 'relative',
-        backgroundImage: 'url(' + url + ')',
-        backgroundSize: 'cover',
-        border: '1px solid #ccc'
-    });
-    // 遮罩层
-    methods.css(mask, {
-        width: width / 4 + 'px',
-        height: height / 4 + 'px',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        backgroundColor: 'yellow',
-        opacity: 0.5,
-        cursor: 'move',
-        display: 'none'
-    });
-    // 设置右侧放大器
-    methods.css(big, {
-        width: width + 'px',
-        height: height + 'px',
-        position: 'absolute',
-        top: 0,
-        left: '100%',
-        background: 'url(' + url + ')' + ' ' + 'no-repeat',
-        backgroundSize: '400%',
-        border: '1px solid #ccc',
-        display: 'none'
-    });
-    // 修改Mask样式
-    function changeMaskStyle(x, y) {
-        methods.css(mask, {
-            left: x + 'px',
-            top: y + 'px'
-        });
-    }
-    // 修改big样式
-    function changeBigStyle(x, y) {
-        methods.css(big, {
-            backgroundPositionX: x * -4 + 'px',
-            backgroundPositionY: y * -4 + 'px'
-        });
-    }
-    function demo(e) {
-        // 鼠标的位置，就是遮罩层的位置,mask中心点
-        let x = e.pageX - positonByHtml.left;
-        let y = e.pageY - positonByHtml.top;
-        // console.log(x,y)
-        // 将中心点变成顶点
-        x -= width / 8;
-        y -= height / 8;
-        // 边界处理
-        if (x < 0) {
-            x = 0;
-            // 宽度超出右边框
-        } else if (x > width * 3 / 4) {
-            x = width * 3 / 4;
-        }
-        if (y < 0) {
-            y = 0;
-            // 高度超出右边框
-        } else if (y > height * 3 / 4) {
-            y = height * 3 / 4;
-        }
-        // 设置样式
-        methods.throttle(function() {
-            changeMaskStyle(x, y);
-        });
-        changeBigStyle(x, y);
-    }
-    // 获取元素在页面中的位置
-    const positonByHtml = methods.offset(dom);
-    // 函数体局部变量
-    // eslint-disable-next-line no-unused-vars
-    let x, y, top, left, maskWidth, maskHeight, domHeight, domWidth;
-    // mask显影交互
-    // 鼠标移入移出 ：mouseover,mouseout(冒泡多次执行)   mouseenter,mouseleave（执行一次）
-    // 鼠标移入，显示
-    dom.addEventListener('mouseenter', function() {
-        methods.css(mask, 'display', 'block');
-        methods.css(big, 'display', 'block');
-        // 直接绑定鼠标移入事件
-        document.addEventListener('mousemove', demo);
-    });
-    // 鼠标移出，隐藏
-    dom.addEventListener('mouseleave', function() {
-        methods.css(mask, 'display', 'none');
-        methods.css(big, 'display', 'none');
-        document.removeEventListener('mousemove', demo);
-    });
-};
-
-/**
      * addEventlisten的浏览器兼容
      *
      * @param {*} dom  元素
@@ -578,10 +469,119 @@ methods.serialize = function(form) {
 };
 
 /**
+     * // 京东放大器
+     *
+     * @param {*} dom 元素
+     * @param {*} url 图片地址
+     * @param {*} width 宽
+     * @param {*} height 高
+     */
+methods.imageZoom = function(dom, url, width, height) {
+    // 创建图片的方式：1、new Image 2、document.createElement('img')
+    const mask = document.createElement('div');
+    const big = document.createElement('div');
+    dom.appendChild(mask);
+    dom.appendChild(big);
+    methods.css(dom, {
+        width: width + 'px',
+        height: height + 'px',
+        position: 'relative',
+        backgroundImage: 'url(' + url + ')',
+        backgroundSize: 'cover',
+        border: '1px solid #ccc'
+    });
+    // 遮罩层
+    methods.css(mask, {
+        width: width / 4 + 'px',
+        height: height / 4 + 'px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        backgroundColor: 'yellow',
+        opacity: 0.5,
+        cursor: 'move',
+        display: 'none'
+    });
+    // 设置右侧放大器
+    methods.css(big, {
+        width: width + 'px',
+        height: height + 'px',
+        position: 'absolute',
+        top: 0,
+        left: '100%',
+        background: 'url(' + url + ')' + ' ' + 'no-repeat',
+        backgroundSize: '400%',
+        border: '1px solid #ccc',
+        display: 'none'
+    });
+    // 修改Mask样式
+    function changeMaskStyle(x, y) {
+        methods.css(mask, {
+            left: x + 'px',
+            top: y + 'px'
+        });
+    }
+    // 修改big样式
+    function changeBigStyle(x, y) {
+        methods.css(big, {
+            backgroundPositionX: x * -4 + 'px',
+            backgroundPositionY: y * -4 + 'px'
+        });
+    }
+    function demo(e) {
+        // 鼠标的位置，就是遮罩层的位置,mask中心点
+        let x = e.pageX - positonByHtml.left;
+        let y = e.pageY - positonByHtml.top;
+        // console.log(x,y)
+        // 将中心点变成顶点
+        x -= width / 8;
+        y -= height / 8;
+        // 边界处理
+        if (x < 0) {
+            x = 0;
+            // 宽度超出右边框
+        } else if (x > width * 3 / 4) {
+            x = width * 3 / 4;
+        }
+        if (y < 0) {
+            y = 0;
+            // 高度超出右边框
+        } else if (y > height * 3 / 4) {
+            y = height * 3 / 4;
+        }
+        // 设置样式
+        methods.throttle(function() {
+            changeMaskStyle(x, y);
+        });
+        changeBigStyle(x, y);
+    }
+    // 获取元素在页面中的位置
+    const positonByHtml = methods.offset(dom);
+    // 函数体局部变量
+    // eslint-disable-next-line no-unused-vars
+    let x, y, top, left, maskWidth, maskHeight, domHeight, domWidth;
+    // mask显影交互
+    // 鼠标移入移出 ：mouseover,mouseout(冒泡多次执行)   mouseenter,mouseleave（执行一次）
+    // 鼠标移入，显示
+    dom.addEventListener('mouseenter', function() {
+        methods.css(mask, 'display', 'block');
+        methods.css(big, 'display', 'block');
+        // 直接绑定鼠标移入事件
+        document.addEventListener('mousemove', demo);
+    });
+    // 鼠标移出，隐藏
+    dom.addEventListener('mouseleave', function() {
+        methods.css(mask, 'display', 'none');
+        methods.css(big, 'display', 'none');
+        document.removeEventListener('mousemove', demo);
+    });
+};
+
+/**
      * 将html代码转化为图片
      * @param {*} dom dom元素
      * @param {*} options 配置  宽高：width， height， canvas样式：style
-     * @description 缺陷 无法设置background-image
+     * @description
      */
 methods.htmlTocanvas = (dom, options) => {
     options = Object.assign({ width: 100, height: 100, style: {}}, options); // 默认样式
@@ -613,19 +613,22 @@ methods.htmlTocanvas = (dom, options) => {
 
     async function init_main() { // 主方法
         const data = await get_svg_dom_string(dom);
-        const DOMURL = window.URL || window.webkitURL || window;
+        // const DOMURL = window.URL || window.webkitURL || window;
         const img = new Image();
-        const svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-        const url = DOMURL.createObjectURL(svg);
-        $canvas.setAttribute('crossorigin', 'Anonymous'); // 设置跨域
-        img.src = url;
-        img.onload = function() { // 最终生成的canvas
-            ctx.drawImage(img, 0, 0);
-            const parentNode = dom.parentNode;
-            parentNode.insertBefore($canvas, dom);
-            DOMURL.revokeObjectURL(url);
-            parentNode.removeChild(dom);
-        };
+        img.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(data)));
+        // const svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+        // const url = DOMURL.createObjectURL(svg);
+        // img.setAttribute('crossOrigin', 'anonymous');
+        // img.src = url;
+        return new Promise(resolve => {
+            img.onload = function() { // 最终生成的canvas
+                ctx.drawImage(img, 0, 0);
+                const parentNode = dom.parentNode;
+                parentNode.insertBefore($canvas, dom); // 将canvas插入原来的位置
+                parentNode.removeChild(dom); // 最终移除页面中被转换的代码
+                resolve($canvas.toDataURL('image/png'));
+            };
+        });
     }
 
     async function get_svg_dom_string(element) { // 将html代码嵌入svg
@@ -645,15 +648,18 @@ methods.htmlTocanvas = (dom, options) => {
         let flag = true;
         // 最外层的节点要加xmlns命名空间
         isTop && (str += `xmlns="http://www.w3.org/1999/xhtml" `);
-        if (str === '<img ') {
+        if (str === '<img ') { // img标签特殊处理
             flag = false;
             let base64Img = '';
-            if (element.src.length > 30000) {
+            if (element.src.length > 30000) { // 判断src属性是不是base64， 是的话不用处理，不是的话，转换base64
                 base64Img = element.src;
             } else {
                 base64Img = await getBase64Image(element.src);
             }
             str += `src="${base64Img}" style="${get_element_styles(element)}" />\n`;
+        } else if (str.includes('svg') || str.includes('path')) {
+            flag = false;
+            str = '';
         } else {
             str += `style="${get_element_styles(element)}">\n`;
         }
@@ -697,7 +703,7 @@ methods.htmlTocanvas = (dom, options) => {
         });
     }
 
-    init_main();
+    return init_main();
 };
 
 methods.skeleton = (dom, fn, req) => {
@@ -773,4 +779,66 @@ methods.skeleton = (dom, fn, req) => {
     init_main();
 };
 
+/**
+ * @function 拖拽元素  */
+methods.dragElement = (dom, parentDom) => {
+    let startX = 0; let startY = 0;
+    const positonByHtml = methods.offset(parentDom);
+    let old = dom.style.transform;
+    console.log(old);
+    old = old.replace(/[^0-9-]/g, ' ').split(' ').filter(item => item !== '');
+    if (old.length === 0) {
+        old = [0, 0];
+    }
+
+    // 主方法
+    function init_main() {
+        dom.addEventListener('mousedown', init_mouse);
+        document.addEventListener('mouseup', destory_mouse);
+    }
+
+    // 鼠标初始化
+    function init_mouse(e) {
+        methods.css(dom, {
+            cursor: 'move'
+        });
+        startX = e.clientX;
+        startY = e.clientY;
+        document.addEventListener('mousemove', move_element);
+    }
+
+    // 元素移动方法
+    function move_element(e) {
+        let moveX = e.clientX - startX + parseInt(old[0]);
+        let moveY = e.clientY - startY + parseInt(old[1]);
+        // 边界判断
+        // getBoundingClientRect
+        if (e.clientX - positonByHtml.left < 0) {
+            moveX = positonByHtml.left - startX;
+        } else if (e.clientX > positonByHtml.left + parentDom.clientWidth) {
+            moveX = positonByHtml.left + parentDom.clientWidth - startX;
+        }
+        if (e.clientY < positonByHtml.top) {
+            moveY = positonByHtml.top - startY;
+        } else if (e.clientY > positonByHtml.top + parentDom.clientHeight) {
+            moveY = positonByHtml.top + parentDom.clientHeight - startY;
+        }
+        methods.css(dom, {
+            transform: `translateX(${moveX}px) translateY(${moveY}px)`
+        });
+    }
+    // 销毁鼠标的方法
+    function destory_mouse(e) {
+        methods.css(dom, {
+            cursor: 'pointer'
+        });
+        dom.removeEventListener('mousedown', init_mouse);
+        document.removeEventListener('mousemove', move_element);
+        document.removeEventListener('mouseup', destory_mouse);
+    }
+
+    init_main();
+};
+
 export default methods;
+

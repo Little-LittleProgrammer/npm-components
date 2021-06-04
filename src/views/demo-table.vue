@@ -16,7 +16,7 @@
 
         <a-divider style="margin: 4px 0;" />
         <v-nodes :vnodes="menu" />
-      </div>  
+      </div>
       <a-select-option v-for="(item, index) in options" :key="index" :value="item.value">
         {{item.name}}
       </a-select-option>
@@ -47,97 +47,93 @@
 </template>
 <script>
 const columns = [
-  { title: 'Full Name', width: 100, key: 'name', fixed: 'left',type: 'input', scopedSlots:{ customRender:'name' } },
-  { title: 'Age', width: 100, key: 'age', fixed: 'left',type: 'button', scopedSlots:{ customRender:'age' } },
-  { title: 'Column 1', key: '1', width: 150, type: 'input', scopedSlots:{ customRender:'input1' } },
-  { title: 'Column 2', key: '2', width: 150, type: 'button',scopedSlots:{ customRender:'button' } },
-  { title: 'Column 3', key: '3', width: 150, type: 'input',scopedSlots:{ customRender:'updateImg' } },
-  { title: 'Column 4', key: '4', width: 150, type: 'textarea',scopedSlots:{ customRender:'1' } },
-  { title: 'Column 5', key: '5', width: 150, scopedSlots:{ customRender:'2' } },
-  { title: 'Column 6', key: '6', width: 150, scopedSlots:{ customRender:'3' } },
-  { title: 'Column 7', key: '7', width: 150, scopedSlots:{ customRender:'input' } },
-  { title: 'Column 8', key: '8', scopedSlots:{ customRender:'4' } },
-  {
-    title: 'Action',
-    key: 'operation',
-    fixed: 'right',
-    width: 100,
-    scopedSlots: { customRender: 'action' },
-  },
+    { title: 'Full Name', width: 100, key: 'name', fixed: 'left', type: 'input', scopedSlots: { customRender: 'name' } },
+    { title: 'Age', width: 100, key: 'age', fixed: 'left', type: 'button', scopedSlots: { customRender: 'age' } },
+    { title: 'Column 1', key: '1', width: 150, type: 'input', scopedSlots: { customRender: 'input1' } },
+    { title: 'Column 2', key: '2', width: 150, type: 'button', scopedSlots: { customRender: 'button' } },
+    { title: 'Column 3', key: '3', width: 150, type: 'input', scopedSlots: { customRender: 'updateImg' } },
+    { title: 'Column 4', key: '4', width: 150, type: 'textarea', scopedSlots: { customRender: '1' } },
+    { title: 'Column 5', key: '5', width: 150, scopedSlots: { customRender: '2' } },
+    { title: 'Column 6', key: '6', width: 150, scopedSlots: { customRender: '3' } },
+    { title: 'Column 7', key: '7', width: 150, scopedSlots: { customRender: 'input' } },
+    { title: 'Column 8', key: '8', scopedSlots: { customRender: '4' } },
+    {
+        title: 'Action',
+        key: 'operation',
+        fixed: 'right',
+        width: 100,
+        scopedSlots: { customRender: 'action' }
+    }
 ];
 
-
-
-
 export default {
-  components: {
-    VNodes: {
-      functional: true,
-      render: (h, ctx) => ctx.props.vnodes,
+    components: {
+        VNodes: {
+            functional: true,
+            render: (h, ctx) => ctx.props.vnodes
+        }
     },
-  },
-  data() {
-    return {
-      data:[],
-      columns:[],
-      selectList:[],
-      isAll:false,
-      options: [
-        {name: 'sam', value: 'sam'},
-        {name: 'jam', value: 'jam'},
-        {name: 'stave', value: 'stave'},
-        {name: 'pony', value: 'pony'}
-      ]
-    };
-  },
-  mounted() {
-    this.initData().then(
-      (data) => {
-        console.log(data)
-        for(let i = 0; i < columns.length; i++) {
-            this.columns.push(columns[i])
-        }
-        for(let i = 0; i < data.length; i++) {
-            this.data.push(data[i])
-        }
-      }
-    )
-    
-  },
-  methods: {
-     initData() {
-      let data = [];
-      return new Promise((reslove) => {
-        setTimeout(() => {
-          for (let i = 0; i < 100; i++) {
-            data.push({
-              key: i,
-              name: `Edrward ${i}`,
-              age: 32,
-              address: `London Park no. ${i}`,
+    data() {
+        return {
+            data: [],
+            columns: [],
+            selectList: [],
+            isAll: false,
+            options: [
+                {name: 'sam', value: 'sam'},
+                {name: 'jam', value: 'jam'},
+                {name: 'stave', value: 'stave'},
+                {name: 'pony', value: 'pony'}
+            ]
+        };
+    },
+    mounted() {
+        this.initData().then(
+            (data) => {
+                console.log(data);
+                for (let i = 0; i < columns.length; i++) {
+                    this.columns.push(columns[i]);
+                }
+                for (let i = 0; i < data.length; i++) {
+                    this.data.push(data[i]);
+                }
+            }
+        );
+    },
+    methods: {
+        initData() {
+            const data = [];
+            return new Promise((reslove) => {
+                setTimeout(() => {
+                    for (let i = 0; i < 100; i++) {
+                        data.push({
+                            key: i,
+                            name: `Edrward ${i}`,
+                            age: 32,
+                            address: `London Park no. ${i}`
+                        });
+                    }
+                    reslove(data);
+                }, 300);
             });
-          }
-          reslove(data)
-        }, 300);
-      }) 
-    },
-    handle_download(data){
-      console.log(data)
+        },
+        handle_download(data){
+            console.log(data);
             // location.href = data.download_url;
         },
-    selectAll() {
-      console.log(this.isAll)
-      console.log(this.selectList)
-      if (this.isAll === true) {
-        this.selectList = []
-        this.options.forEach(item => {
-          this.selectList.push(item.value)
-        })
-      } else {
-        this.selectList = []
-      }
+        selectAll() {
+            console.log(this.isAll);
+            console.log(this.selectList);
+            if (this.isAll === true) {
+                this.selectList = [];
+                this.options.forEach(item => {
+                    this.selectList.push(item.value);
+                });
+            } else {
+                this.selectList = [];
+            }
+        }
     }
-  }
 };
 </script>
 <style lang="scss" scoped>

@@ -20,11 +20,6 @@ const routes = [
         component: () => import(/* webpackChunkName: "about" */ '../views/water-mark.vue')
     },
     {
-        path: '/big-select',
-        name: 'BigSelect',
-        component: () => import(/* webpackChunkName: "about" */ '../views/big-select.vue')
-    },
-    {
         path: '/darg-to-recycle',
         name: 'DargToRecycle',
         component: () => import(/* webpackChunkName: "about" */ '../views/darg-to-recycle.vue')

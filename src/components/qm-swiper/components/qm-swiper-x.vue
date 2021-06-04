@@ -18,28 +18,28 @@
 </template>
 
 <script>
-import iconLeftArrow from '@/components/vue-icon/icon-left-arrow'
-import iconRightArrow from '@/components/vue-icon/icon-right-arrow'
-import methods from '@/assets/js/tools'
+import iconLeftArrow from '@/components/vue-icon/icon-left-arrow';
+import iconRightArrow from '@/components/vue-icon/icon-right-arrow';
+import methods from '@/assets/js/tools';
 export default {
     components: { iconLeftArrow, iconRightArrow },
     props: {
         width: { // 容器宽度
             type: String || Number,
-            default: '800' 
+            default: '800'
         },
         // height: { // 容器高度
         //     type: String || Number,
         //     default: '600'
         // },
         lunboTime: { // 轮播时间 为null时，不轮播
-            type: Number,
+            type: Number
         },
         imgList: { // 图片列表
             type: Array
         },
         lunboType: { // 展示模式 defalut，正常模式，movie：电影院模式
-            type: String,
+            type: String
         }
     },
     data() {
@@ -48,87 +48,86 @@ export default {
             timebar: '', // 定时器
             boxs: '', // 轮播图的容器
             smallBtn: '', // 小圆点的容器
-            startX:0, // 鼠标按下去的记录点
-            endX:0, // 鼠标松掉的记录点
+            startX: 0, // 鼠标按下去的记录点
+            endX: 0, // 鼠标松掉的记录点
             containerWidth: '', // 容器宽度值
-            containerHeight: '', // 容器高度值,
-        }
+            containerHeight: '' // 容器高度值,
+        };
     },
     watch: {
         imgList: {
             immediate: true,
             handler(val) {
-                if ( val.length !== 0 ) { // 初始化该初始化的值
+                if (val.length !== 0) { // 初始化该初始化的值
                     this.$nextTick(() => {
-                        this.container = document.querySelector('.container')
-                        this.boxs = document.querySelector('.lunbo')
-                        this.smallBtn = document.querySelectorAll('.smallBtn span')
-                        console.log(this.smallBtn)
-                        this.smallBtn[0].setAttribute('class','choose')
+                        this.container = document.querySelector('.container');
+                        this.boxs = document.querySelector('.lunbo');
+                        this.smallBtn = document.querySelectorAll('.smallBtn span');
+                        console.log(this.smallBtn);
+                        this.smallBtn[0].setAttribute('class', 'choose');
                         if (this.lunboTime !== null) {
-                            this.start_time()
-                        } 
-                        console.log(methods)
+                            this.start_time();
+                        }
+                        console.log(methods);
                         if (this.lunboType === 'moive') {
                             methods.css(this.container, {
                                 backgroundColor: 'transparent',
                                 overflow: 'visible'
-                            })
+                            });
                         }
-                    })
+                    });
                 }
             }
         },
         width: {
-            immediate:true,
+            immediate: true,
             handler(val) { // 根据传入的宽度，动态计算高度
                 this.$nextTick(() => {
-                    let _img = new Image()
-                    _img.src = this.imgList[0].url
-                    if(val.indexOf('%') !== -1) {
-                        const _data = val.replace('%', '')
-                        this.containerWidth = 'w-p-' + _data
+                    const _img = new Image();
+                    _img.src = this.imgList[0].url;
+                    if (val.indexOf('%') !== -1) {
+                        const _data = val.replace('%', '');
+                        this.containerWidth = 'w-p-' + _data;
                         _img.onload = (e) => {
                             this.containerHeight = {
-                                height: ( this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
-                            } 
-                        }
+                                height: (this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
+                            };
+                        };
                     } else {
                         this.containerWidth = 'w-' + val;
                         _img.onload = (e) => {
                             this.containerHeight = {
-                                height: ( this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
-                            } 
-                        }
+                                height: (this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
+                            };
+                        };
                     }
-                })
-                
+                });
             }
-        },
+        }
     },
     methods: {
         // 定时器
         time_set(){
-            this.index++
+            this.index++;
             // 判断边界
-            if(this.index >= this.imgList.length){
-                this.index =0;
+            if (this.index >= this.imgList.length){
+                this.index = 0;
             }
             this.animate_img();
         },
         // 滚轮监听事件
         mouse_wheel(e) {
             if (e.wheelDelta > 0) {
-                this.right()
+                this.right();
             } else if (e.wheelDelta < 0) {
-                this.left()
+                this.left();
             }
         },
         // 开始轮播
         start_time() {
             if (this.lunboTime !== null) {
-                this.timebar= setInterval(this.time_set, this.lunboTime);
-            } 
+                this.timebar = setInterval(this.time_set, this.lunboTime);
+            }
         },
         // 清除定时器
         clear_interval() {
@@ -138,108 +137,108 @@ export default {
         },
         // 鼠标按下事件
         mouse_down(e) {
-            this.clear_interval() // 清空定时器
+            this.clear_interval(); // 清空定时器
             methods.css(this.boxs, {
-                transition: 'none',
-            }) // 将动画清掉，以避免鼠标移动时卡顿
+                transition: 'none'
+            }); // 将动画清掉，以避免鼠标移动时卡顿
             this.startX = e.clientX; // 记录开始位置
             this.boxs.addEventListener('mousemove', this.mouse_move); // 移动监听
             document.addEventListener('mouseup', this.mouse_up); // 鼠标谈起监听
         },
         // 鼠标弹起事件
-        mouse_up(e) { 
-            const _width = 800
+        mouse_up(e) {
+            const _width = 800;
             this.endX = e.clientX; // 记录最终位置
             methods.css(this.boxs, {
-                transition: 'all .5s',
-            }) // 动画恢复
+                transition: 'all .5s'
+            }); // 动画恢复
             if (this.endX - this.startX <= -(_width / 2)) { // 如果最终位置-开始位置大于图片的一半，则切换图片
                 this.index++;
-                if(this.index >= this.imgList.length){
+                if (this.index >= this.imgList.length){
                     this.index = this.imgList.length - 1;
                 }
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             } else if (this.endX - this.startX >= (_width / 2)) { // 如果最终位置-开始位置大于图片的一半，则切换图片
                 this.index--;
-                if(this.index < 0){
+                if (this.index < 0){
                     this.index = 0;
                 }
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             } else { // 如果小于，则恢复初始位置
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             }
             this.boxs.removeEventListener('mousemove', this.mouse_move); // 移除鼠标移动事件
             document.removeEventListener('mouseup', this.mouse_up); // 移除鼠标弹起事件
         },
         mouse_move(e) { // 鼠标移动事件，设置图片移动距离
-            const _width = 800
+            const _width = 800;
             if (this.lunboType === 'moive') {
                 methods.css(this.boxs, {
-                    transform: `translateX(${(-this.index * _width + e.clientX - this.startX)}px)`,
-                })
+                    transform: `translateX(${(-this.index * _width + e.clientX - this.startX)}px)`
+                });
             } else if (this.lunboType === 'default') {
                 methods.css(this.boxs, {
-                    transform: `translateX(${(-this.index * _width  + e.clientX - this.startX)}px)`,
-                })
+                    transform: `translateX(${(-this.index * _width + e.clientX - this.startX)}px)`
+                });
             }
         },
         left(){ // 左箭头点击事件
             // 关闭定时器
-            this.clear_interval()
+            this.clear_interval();
             this.index--;
-            if(this.index < 0){
+            if (this.index < 0){
                 this.index = this.imgList.length - 1;
             }
             // 轮播方法，参数为定时器名称
-            this.animate_img(this.start_time)
+            this.animate_img(this.start_time);
         },
         right(){ // 右箭头点击事件
             // 关闭定时器
-            this.clear_interval()
+            this.clear_interval();
             this.index++;
-            if(this.index >= this.imgList.length){
+            if (this.index >= this.imgList.length){
                 this.index = 0;
             }
-            this.animate_img(this.start_time)
+            this.animate_img(this.start_time);
         },
         animate_img(fn){ // 底部span切换
-            const _width = 800
+            const _width = 800;
             methods.css(this.boxs, {
-                transform: `translateX(${((-this.index * _width))}px)`,
-            })
+                transform: `translateX(${((-this.index * _width))}px)`
+            });
             for (let i = 0; i < this.smallBtn.length; i++) {
                 if (i === +this.index) {
                     if (this.lunboType === 'moive') {
                         methods.css(this.boxs.children[i], {
                             transform: 'translateZ(0px)',
                             transformOrigin: '0'
-                        })
+                        });
                     }
-                    this.smallBtn[i].setAttribute('class','choose')
+                    this.smallBtn[i].setAttribute('class', 'choose');
                 } else {
                     if (this.lunboType === 'moive') {
                         methods.css(this.boxs.children[i], {
-                            transform: `translateZ(${-1000*(Math.abs(this.index-i))}px)`,
+                            transform: `translateZ(${-1000 * (Math.abs(this.index - i))}px)`,
                             transformOrigin: '0'
-                        })
+                        });
                     }
-                    this.smallBtn[i].setAttribute('class', '')
+                    this.smallBtn[i].setAttribute('class', '');
                 }
             }
-            if(fn){
-                fn()
+            if (fn){
+                fn();
             }
         },
         change_img(e) { // 点击底部span的回调，使用事件委托
-            if (e.target.id !=='') {
+            if (e.target.id !== '') {
                 // 关闭定时器
-                this.clear_interval()
+                this.clear_interval();
                 this.index = e.target.id;
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             }
         }
     }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -271,9 +270,9 @@ export default {
         display: flex;
         align-items: flex-end;
         overflow: visible;
-        transform-style: preserve-3d; 
+        transform-style: preserve-3d;
         perspective: 3000px;
-        img {  
+        img {
             transition: all .5s;
         }
     }
