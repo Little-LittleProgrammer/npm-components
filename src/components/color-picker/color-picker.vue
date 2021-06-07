@@ -421,7 +421,7 @@ export default {
 .color-picker-container {
 	position: fixed;
 	display: none;
-  
+	z-index: 999
 }
 .color-picker-container.active{
 	display: block;
