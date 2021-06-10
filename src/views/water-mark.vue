@@ -275,9 +275,10 @@ export default {
             const $dom = this._parentNode;
             const $domParent = this._grentParentNode;
             const transformOption = this.get_origin_transform($domParent);
+            // 中心点的计算是根据浏览器视口的计算，offset是根据页面元素的位置，所以要减去卷动值
             const positonByHtml = {
-                centerX: Methods.offset($dom).left + $dom.clientWidth / 2,
-                centerY: Methods.offset($dom).top + $dom.clientHeight / 2
+                centerX: Methods.offset($dom).left + $dom.clientWidth / 2 - document.documentElement.scrollLeft,
+                centerY: Methods.offset($dom).top + $dom.clientHeight / 2 - document.documentElement.scrollTop
             };
             let x = e.clientX;
             let y = e.clientY;
