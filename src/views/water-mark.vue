@@ -5,53 +5,94 @@
                 <ul>
                     <li>
                         <div>
-                            <span>文件： </span>
+                            <span>文件：</span>
                             <input type="file" accept="image/*" @change="get_file_data" />
                         </div>
                     </li>
                     <li>
-                        <div>
-                            <span>姓名： </span>
-                            <input v-model="form.username" type="text"/>
-                        </div>
-                        <div>
-                            <span>字体颜色： </span>
-                            <input type="text" id="color-input" v-model="form.color" auto-complete="off"  @focus="open_picker"/>
-                            <color-picker ref="ref-colorPicker" :color="form.color" :targetElem="'#color-input'" @onChange="set_form_color"></color-picker>
-                        </div>
-                    </li>
-                    <li>
                         <div @change="get_layout">
-                            <span> 样式： </span>
-                            <input checked type="radio" name="layout" value="1"/> 斜切平铺
-                            <input type="radio" name="layout" value="2"/> 自定义
-                        </div>
-                        <div>
-                            <span> 字体大小： </span>
-                            <input v-model="form.size" type="text" @input="set_form_size"/>
+                            <span>样式：</span>
+                            <input checked type="radio" name="layout" value="1" /> 斜切平铺
+                            <input type="radio" name="layout" value="2" /> 自定义
                         </div>
                     </li>
-                    <li>
-                        <button @click="get_img">生成图片 </button>
-                        <a :disabled="exportDisabled" :class="{'disabled':exportDisabled}" :href="url" download="watermarkImage.png">导出</a>
-                        <button @click="reload_page">重置 </button>
+                    <div v-for="item in markList" :key="item.index">
+                        <li>
+                            <div>
+                                <span>姓名：</span>
+                                <input v-model="item.username" type="text" />
+                            </div>
+                            <div>
+                                <span>字体颜色：</span>
+                                <input
+                                    type="text"
+                                    :id="'color-input'+item.index"
+                                    v-model="item.color"
+                                    auto-complete="off"
+                                    @focus="open_picker(item, $event)"
+                                    @input="change_color(item, $event)"
+                                />
+                                <color-picker
+                                    ref="ref-colorPicker"
+                                    :color="item.color"
+                                    :targetElem="'#color-input'+item.index"
+                                    @onChange="(color)=>{ set_form_color(color, item)}"
+                                ></color-picker>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span>字体大小：</span>
+                                <input v-model="item.size" type="text" @input="set_form_size(item)" />
+                            </div>
+                            <button
+                                v-if="item.index===markList.length-1 && item.index !==0"
+                                :disabled="form.layout!=='2'"
+                                :class="{'disabled':form.layout!=='2'}"
+                                @click="del_water_mark"
+                            >删除水印</button>
+                            <button
+                                v-if="form.layout=='2'&&item.index===markList.length-1"
+                                :class="{'disabled':form.layout!=='2'}"
+                                @click="add_water_mark"
+                            >添加水印</button>
+                        </li>
+                    </div>
+                    <li class="button-group">
+                        <button @click="get_img">生成图片</button>
+                        <a
+                            :disabled="exportDisabled"
+                            :class="{'disabled':exportDisabled}"
+                            :href="url"
+                            :download="markList[0].username+'.png'"
+                        >导出</a>
+                        <button @click="reload_page">重置</button>
                     </li>
                 </ul>
-
             </div>
             <div class="result-container" ref="ref-result-container">
                 <div class="img-container" ref="ref-img-container">
                     <img :src="imgUrl" alt />
-                        <!-- <template v-for="item in markList" > 未来考虑自定义多个水印 -->
-                        <div v-if="form.layout==2"  class="name-box" ref="ref-name" >
-                            <div class="name-rotate" ref="ref-name-rotate">
-                                <span draggable="true" @dragstart="drag_handle">{{form.username}}</span>
-                                <icon-rotate class="icon rotate" @mousedown.prevent="rotate_name"></icon-rotate>
+                    <template v-if="form.layout=='2'">
+                        <template v-for="item in markList">
+                            <div class="name-box" ref="ref-name" :key="item.index">
+                                <div class="name-rotate" ref="ref-name-rotate">
+                                    <span
+                                        draggable="true"
+                                        @dragstart="drag_handle"
+                                    >{{item.username}}</span>
+                                    <icon-rotate
+                                        class="icon rotate"
+                                        @mousedown.prevent="rotate_name"
+                                    ></icon-rotate>
+                                </div>
                             </div>
-                        </div>
-                        <!-- </template> -->
+                        </template>
+                    </template>
                     <div v-else class="qm-watermark">
-                        <p v-for="item in 16" :key="'line'+item"><span v-for="i in 60" :key="'name'+i">{{form.username}}</span></p>
+                        <p v-for="item in 16" :key="'line'+item">
+                            <span v-for="i in 60" :key="'name'+i">{{markList[0].username}}</span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -67,31 +108,45 @@ export default {
     data() {
         return {
             imgUrl: '',
-            markList: ['1', '2'],
-            url: '',
             form: {
-                username: '',
-                color: '#000000',
-                layout: 1,
-                size: 14
+                layout: '1'
             },
+            keyIndex: 0,
+            markList: [
+                {
+                    index: 0,
+                    username: '',
+                    color: '#000000',
+                    size: 14
+                }
+            ],
+            url: '',
             exportDisabled: true,
             key: 0
         };
     },
     components: {
-        iconRotate, colorPicker
+        iconRotate,
+        colorPicker
     },
-    mounted() {
-
-    },
+    mounted() {},
 
     methods: {
+        add_water_mark() {
+            this.keyIndex++;
+            this.markList.push({
+                index: this.keyIndex,
+                username: '',
+                color: '#000000',
+                size: 14
+            });
+        },
+        del_water_mark() {
+            this.keyIndex--;
+            this.markList.pop();
+        },
         get_layout(e) {
             this.form.layout = e.target.value;
-            if (this.form.layout == 1) {
-                console.log(1);
-            }
         },
         get_file_data(data) {
             const fileReader = new FileReader();
@@ -103,8 +158,10 @@ export default {
                 _image.src = this.imgUrl;
                 _image.onload = (e) => {
                     if (e.path[0].width > document.body.clientWidth) {
-                        $resultContainer.style.width = document.body.clientWidth + 'px';
-                        $imgContainer.style.width = document.body.clientWidth - 40 + 'px';
+                        $resultContainer.style.width =
+                            document.body.clientWidth + 'px';
+                        $imgContainer.style.width =
+                            document.body.clientWidth - 40 + 'px';
                     } else {
                         $resultContainer.style.width = e.path[0].width + 'px';
                         $imgContainer.style.width = e.path[0].width - 40 + 'px';
@@ -117,18 +174,31 @@ export default {
                 new Error('blobToBase64 error');
             };
         },
-        open_picker(event) {
-            this.$refs['ref-colorPicker'].openPicker();
-            this.$refs['ref-colorPicker'].updateValue(event);
+        open_picker(item, event) {
+            this.$refs['ref-colorPicker'][item.index].openPicker();
+            this.$refs['ref-colorPicker'][item.index].updateValue(event);
         },
-        set_form_color(color) {
-            this.form.color = color;
-            const $dom = this.$refs['ref-img-container'];
+        change_color(item, e) {
+            const _cacheColor = e.target.value;
+            const $dom = this.form.layout === '1'
+                ? this.$refs['ref-img-container']
+                : this.$refs['ref-name'][item.index];
+            $dom.style.color = _cacheColor;
+            this.$refs['ref-colorPicker'][item.index].updateValue(e);
+        },
+        set_form_color(color, item) {
+            item.color = color;
+            const $dom = this.form.layout === '1'
+                ? this.$refs['ref-img-container']
+                : this.$refs['ref-name'][item.index];
             $dom.style.color = color;
         },
-        set_form_size() {
-            const $dom = this.$refs['ref-img-container'];
-            $dom.style.fontSize = this.form.size + 'px';
+        set_form_size(item) {
+            const $dom =
+                this.form.layout === '1'
+                    ? this.$refs['ref-img-container']
+                    : this.$refs['ref-name'][item.index];
+            $dom.style.fontSize = item.size + 'px';
         },
         get_img() {
             const $dom = document.getElementsByClassName('img-container')[0];
@@ -139,49 +209,45 @@ export default {
                     margin: '0 auto'
                 }
             };
-            Methods.htmlTocanvas($dom, option).then(data => {
+            Methods.htmlTocanvas($dom, option).then((data) => {
                 this.url = data;
                 this.exportDisabled = false;
             });
         },
-        drag_handle(e){
-            const $dom = this.$refs['ref-name'];
-            // const $domParent = this.$refs['ref-img-container'];
-            // const positonByHtml = Methods.offset($domParent);
-            const transformOption = this.get_origin_transform($dom);
-            const startX = e.clientX;
-            const startY = e.clientY;
-            $dom.ondrag = (e) => {
-                e.preventDefault();
-                const option = {
-                    moveX: e.clientX - startX + parseInt(transformOption.translateX || 0),
-                    moveY: e.clientY - startY + parseInt(transformOption.translateY || 0),
-                    deg: transformOption.rotate || 0
+        drag_handle(e) {
+            for (let i = 0; i < this.markList.length; i++) {
+                const $dom = this.$refs['ref-name'][i];
+                const transformOption = this.get_origin_transform($dom);
+                const startX = e.clientX;
+                const startY = e.clientY;
+                $dom.ondrag = (e) => {
+                    e.preventDefault();
+                    const option = {
+                        moveX:
+                            e.clientX -
+                            startX +
+                            parseInt(transformOption.translateX || 0),
+                        moveY:
+                            e.clientY -
+                            startY +
+                            parseInt(transformOption.translateY || 0),
+                        deg: transformOption.rotate || 0
+                    };
+                    this.set_transform($dom, option);
                 };
-                // 边界处理
-                // if (e.clientX - positonByHtml.left < 0) {
-                //     moveX = positonByHtml.left - startX;
-                // } else if (e.clientX > positonByHtml.left + $domParent.clientWidth) {
-                //     moveX = positonByHtml.left + $domParent.clientWidth - startX;
-                // }
-                // if (e.clientY < positonByHtml.top) {
-                //     moveY = positonByHtml.top - startY;
-                // } else if (e.clientY > positonByHtml.top + $domParent.clientHeight) {
-                //     moveY = positonByHtml.top + $domParent.clientHeight - startY;
-                // }
-                this.set_transform($dom, option);
-            };
-            $dom.ondragover = (e) => {
-                e.preventDefault();
-            };
+                $dom.ondragover = (e) => {
+                    e.preventDefault();
+                };
+            }
         },
         get_origin_transform($dom) {
             let old = $dom.style.transform;
             const transformOption = {};
             if (old) {
                 old = old.split(' ');
-                old.forEach(item => {
-                    transformOption[item.replace(/\((.*)\)/, '')] = item.replace(/[^0-9-]/g, '');
+                old.forEach((item) => {
+                    transformOption[item.replace(/\((.*)\)/, '')] =
+                        item.replace(/[^0-9-]/g, '');
                 });
             }
             return transformOption;
@@ -191,15 +257,23 @@ export default {
                 transform: `rotate(${option.deg}deg) translateX(${option.moveX}px) translateY(${option.moveY}px)`
             });
         },
-        rotate_name() {
+        rotate_name(e) {
+            this._parentNode =
+                e.target.tagName.toLowerCase() === 'svg'
+                    ? e.target.parentNode
+                    : e.target.parentNode.parentNode;
+            this._grentParentNode =
+                e.target.tagName.toLowerCase() === 'svg'
+                    ? e.target.parentNode.parentNode
+                    : e.target.parentNode.parentNode.parentNode;
             document.addEventListener('mousemove', this.get_rotate_deg);
             document.addEventListener('mouseup', () => {
                 document.removeEventListener('mousemove', this.get_rotate_deg);
             });
         },
         get_rotate_deg(e) {
-            const $dom = this.$refs['ref-name-rotate'];
-            const $domParent = this.$refs['ref-name'];
+            const $dom = this._parentNode;
+            const $domParent = this._grentParentNode;
             const transformOption = this.get_origin_transform($domParent);
             const positonByHtml = {
                 centerX: Methods.offset($dom).left + $dom.clientWidth / 2,
@@ -207,13 +281,20 @@ export default {
             };
             let x = e.clientX;
             let y = e.clientY;
-            const origin = {x: +positonByHtml.centerX + parseInt(transformOption.translateX || 0), y: +positonByHtml.centerY + parseInt(transformOption.translateY || 0) }; // 先手动指定当前中心点，也可以根据当前元素的left+width/2 的到x  top+height/2 得到y值
+            const origin = {
+                x:
+                    +positonByHtml.centerX +
+                    parseInt(transformOption.translateX || 0),
+                y:
+                    +positonByHtml.centerY +
+                    parseInt(transformOption.translateY || 0)
+            }; // 先手动指定当前中心点，也可以根据当前元素的left+width/2 的到x  top+height/2 得到y值
             // 计算出当前鼠标相对于元素中心点的坐标
             x = x - origin.x; // 因为x大于origin.x 是在y轴右边，直接减就行了
-            y = origin.y - y;// 但是y如果要在x轴上方，它是比origin.y要小的，所以这里就需要反过来
+            y = origin.y - y; // 但是y如果要在x轴上方，它是比origin.y要小的，所以这里就需要反过来
 
             // 然后计算就可以了
-            const deg = Math.atan2(y, x) / Math.PI * 180;
+            const deg = (Math.atan2(y, x) / Math.PI) * 180;
             const option = {
                 moveX: 0,
                 moveY: 0,
@@ -222,18 +303,25 @@ export default {
             this.set_transform($dom, option);
         },
         // 重新渲染页面
-        reload_page(){
+        reload_page() {
             this.key++;
             this.form = {
-                username: '',
-                color: '#000000',
-                layout: 1,
-                size: 14
+                layout: '1'
             };
+            this.keyIndex = 0;
+            this.markList = [
+                {
+                    index: 0,
+                    username: '',
+                    color: '#000000',
+                    size: 14
+                }
+            ];
             this.imgUrl = '';
             this.exportDisabled = true;
         }
-    }};
+    }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -257,7 +345,7 @@ export default {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                &:last-child {
+                &.button-group {
                     justify-content: flex-end;
                 }
             }
@@ -268,15 +356,16 @@ export default {
             outline: none;
             padding: 1px 6px;
         }
-        button,a {
+        button,
+        a {
             padding: 0 10px;
             margin-left: 10px;
-            border: 1px solid #E6A817;
+            border: 1px solid #e6a817;
             border-radius: 8px;
             color: white;
-            background-color: #E6A817;
+            background-color: #e6a817;
             &:hover {
-                background-color: #CC7400;
+                background-color: #cc7400;
             }
         }
         .disabled {
@@ -321,7 +410,8 @@ export default {
                     }
                 }
             }
-            .qm-watermark { // 水印
+            .qm-watermark {
+                // 水印
                 position: absolute;
                 z-index: 99999;
                 top: 0;
@@ -331,9 +421,9 @@ export default {
                 pointer-events: none;
                 font-family: Cursive, serif;
                 overflow: hidden;
-                $e:17;
+                $e: 17;
                 @for $i from 0 to $e {
-                    p:nth-child(#{$i}){
+                    p:nth-child(#{$i}) {
                         white-space: nowrap;
                         transform-origin: (18% * ($i - 1)) 1%;
                         transform: rotate(-20deg);
@@ -348,11 +438,10 @@ export default {
     }
 }
 
-@each $i in (20, 40, 60, 80, 100, 120, 140, 160,180, 200) {
+@each $i in (20, 40, 60, 80, 100, 120, 140, 160, 180, 200) {
     .w-#{$i} {
-        width: $i+px
+        width: $i + px;
     }
 }
-
 </style>
 

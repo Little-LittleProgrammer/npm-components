@@ -1,12 +1,12 @@
 
 <template>
 <div>
-	<div class="color-picker-container" :id="containerId" :class="{'active':isShowPicker}">
-		<div class="color"></div>
-		<div class="wheel"></div>
-		<div class="overlay"></div>
-		<div class="h-marker marker"></div>
-		<div class="sl-marker marker"></div>
+	<div ref="ref-color-picker-container" class="color-picker-container" :id="containerId" :class="{'active':isShowPicker}">
+		<div ref="ref-color" class="color"></div>
+		<div ref="ref-wheel" class="wheel"></div>
+		<div ref="ref-overlay" class="overlay"></div>
+		<div ref="ref-h-marker" class="h-marker marker"></div>
+		<div ref="ref-sl-marker" class="sl-marker marker"></div>
 	</div>
 </div>
 </template>
@@ -30,7 +30,7 @@ export default {
 	data(){
 		return {
 			isShowPicker:false,
-			wheel:document.querySelector('.wheel'),
+			wheel:this.$refs['ref-wheel'],
 			color:this.defaultColor,
 			containerId:"color-picker-container",
 			dom:{
@@ -47,15 +47,13 @@ export default {
 		}
 	},
 	mounted(){
-
-		this.dom.container=document.querySelector('#'+this.containerId);
-		this.dom.hMarker=document.querySelector('.h-marker');
-		this.dom.slMarker=document.querySelector('.sl-marker');
-		this.dom.color=document.querySelector('.color');
+		this.dom.container=this.$refs['ref-color-picker-container'];
+		this.dom.hMarker=this.$refs['ref-h-marker'];
+		this.dom.slMarker=this.$refs['ref-sl-marker'];
+		this.dom.color=this.$refs['ref-color'];
 		this.dom.targetElem=document.querySelector(this.targetElem);
 
 
-		this.init();
 	},
 	methods:{
 		init:function(){
@@ -67,9 +65,10 @@ export default {
 		    self.setColor(self.color);
 		},
 		openPicker:function(){
+			this.init();
 			var self = this;
 			this.isShowPicker = true;
-			this.wheel=document.querySelector('.wheel');
+			this.wheel=this.$refs['ref-wheel'];
 			/*色盘打开的时候绑定点击事件*/
 			document.addEventListener("click",self.documentClick);
 		},
@@ -143,7 +142,6 @@ export default {
 			/*获取祖先节点，返回一个数组*/
 		    var target = e.target;
 		    var parent = typeof parent==='string'?document.querySelector(parent):parent;
-
 		    var curTarget = target;
 
 		    var arr = typeof andSelf === "undefined"?[curTarget]:[];
