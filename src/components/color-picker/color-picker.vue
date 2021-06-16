@@ -52,8 +52,6 @@ export default {
 		this.dom.slMarker=this.$refs['ref-sl-marker'];
 		this.dom.color=this.$refs['ref-color'];
 		this.dom.targetElem=document.querySelector(this.targetElem);
-
-
 	},
 	methods:{
 		init:function(){
