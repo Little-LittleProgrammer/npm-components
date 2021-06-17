@@ -626,7 +626,7 @@ methods.htmlTocanvas = (dom, options) => {
                 const parentNode = dom.parentNode;
                 parentNode.insertBefore($canvas, dom); // 将canvas插入原来的位置
                 parentNode.removeChild(dom); // 最终移除页面中被转换的代码
-                resolve($canvas.toDataURL('image/png'));
+                resolve($canvas);
             };
         });
     }

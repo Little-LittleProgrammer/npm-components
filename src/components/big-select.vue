@@ -115,7 +115,6 @@ export default {
             immediate: true,
             handler(val){
                 this.loading = true;
-                console.log(val);
                 let timeOut = ''; // 当查询回来数据为空时，避免一直为loading图标
                 if (timeOut !== '' || timeOut !== undefined) {
                     clearTimeout(timeOut);
@@ -209,7 +208,6 @@ export default {
 
         // 阻止焦点移除
         mouse_event(e) {
-            console.log(e.target.offsetParent.className);
             // 针对这块，千万不要将类名命名重名
             if (e.target.offsetParent.className.includes('qm-select-container') || e.target.offsetParent.className.includes('multiple-item') || e.target.offsetParent.className.includes('selected-item')) {
                 e.preventDefault();
@@ -295,7 +293,7 @@ export default {
                     this.$emit('selectData', this.selectVal); // 单选情况下 返回筛选的数据
                 } else {
                     if (this.selectAllList.length !== 0) {
-                        console.log(this.selectVal);
+                        console.log('select', this.selectVal);
                         this.$emit('selectData', this.selectVal); // 多选情况下 返回筛选的数据列表
                     }
                 }
@@ -332,8 +330,6 @@ export default {
                 } else {
                     this.$emit('findSelectList', this.scrollPageState.scrollPage, this.searchData);
                 }
-            } else if (target.scrollTop < 20) {
-                console.log('1');
             }
         },
 

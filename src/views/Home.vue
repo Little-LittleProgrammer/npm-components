@@ -9,7 +9,7 @@
 <template>
   <div class="home">
     <!-- multiple -->
-    <big-select :selectAllList="list" async="async" type="multiple" :defaultCheckedList="defaultCheckedList" @findSelectList="asd"></big-select>
+    <big-select :selectAllList="list" async="async" type="multiple" :defaultCheckedList="defaultCheckedList"></big-select>
     <big-select v-model="defaultCheckedList" style="margin-left:700px" :selectAllList="list" type="multiple"></big-select>
 
   </div>
@@ -43,9 +43,6 @@ export default {
         getRandom(num){
             var random = Math.floor((Math.random() + Math.floor(Math.random() * 9 + 1)) * Math.pow(10, num - 1));
             return random;
-        },
-        asd(val) {
-            console.log(val);
         }
     }
 };
