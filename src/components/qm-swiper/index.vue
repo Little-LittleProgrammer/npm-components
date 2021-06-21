@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import QmSwiperX from '@/components/qm-swiper/components/qm-swiper-x copy'
-import QmSwiperY from '@/components/qm-swiper/components/qm-swiper-y'
+import QmSwiperX from '@/components/qm-swiper/components/qm-swiper-x';
+import QmSwiperY from '@/components/qm-swiper/components/qm-swiper-y';
 export default {
     components: { QmSwiperX, QmSwiperY },
     props: {
@@ -21,7 +21,7 @@ export default {
         },
         width: { // 容器宽度
             type: String || Number,
-            default: '800' 
+            default: '800'
         },
         // height: { // 容器高度
         //     type: String || Number,
@@ -39,7 +39,7 @@ export default {
             default: 'default'
         }
     }
-}
+};
 </script>
 
 <style lang="scss" scoped>

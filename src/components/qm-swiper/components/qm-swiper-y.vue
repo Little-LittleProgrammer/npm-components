@@ -10,12 +10,12 @@
 </template>
 
 <script>
-import methods from '@/assets/js/tools'
+import methods from '@/assets/js/tools';
 export default {
     props: {
         width: { // 容器宽度
             type: String || Number,
-            default: '800' 
+            default: '800'
         },
         // height: { // 容器高度
         //     type: String || Number,
@@ -35,55 +35,54 @@ export default {
             timebar: '',
             boxs: '',
             smallBtn: '',
-            startY:0,
-            endY:0,
+            startY: 0,
+            endY: 0,
             containerWidth: '',
             containerHeight: ''
-        }
+        };
     },
     watch: {
         imgList: {
             immediate: true,
             handler(val) {
-                if ( val.length !== 0 ) {
+                if (val.length !== 0) {
                     this.$nextTick(() => {
-                        this.container = document.querySelector('.container')
-                        this.boxs = document.querySelector('.lunbo')
-                        this.smallBtn = document.querySelectorAll('.smallBtn span')
-                        this.smallBtn[0].setAttribute('class','choose')
+                        this.container = document.querySelector('.container');
+                        this.boxs = document.querySelector('.lunbo');
+                        this.smallBtn = document.querySelectorAll('.smallBtn span');
+                        this.smallBtn[0].setAttribute('class', 'choose');
                         if (this.lunboTime !== null) {
-                            this.start_time()
-                        } 
-                    })
+                            this.start_time();
+                        }
+                    });
                 }
             }
         },
         width: {
-            immediate:true,
+            immediate: true,
             handler(val) {
                 this.$nextTick(() => {
-                    let _img = new Image()
-                    _img.src = this.imgList[0].url
-                    if(val.indexOf('%') !== -1) {
-                        const _data = val.replace('%', '')
-                        this.containerWidth = 'w-p-' + _data
+                    const _img = new Image();
+                    _img.src = this.imgList[0].url;
+                    if (val.indexOf('%') !== -1) {
+                        const _data = val.replace('%', '');
+                        this.containerWidth = 'w-p-' + _data;
                         _img.onload = (e) => {
                             this.containerHeight = {
-                                height: ( this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
-                            } 
-                        }
+                                height: (this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
+                            };
+                        };
                     } else {
                         this.containerWidth = 'w-' + val;
                         _img.onload = (e) => {
                             this.containerHeight = {
-                                height: ( this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
-                            } 
-                        }
+                                height: (this.container.clientWidth * e.path[0].height / e.path[0].width) + 'px'
+                            };
+                        };
                     }
-                })
-                
+                });
             }
-        },
+        }
         // height: {
         //     immediate:true,
         //     handler(val) {
@@ -99,26 +98,26 @@ export default {
     methods: {
         // 定时器
         time_set(){
-            this.index++
+            this.index++;
             // 判断边界
-            if(this.index >= this.imgList.length){
-                this.index =0;
+            if (this.index >= this.imgList.length){
+                this.index = 0;
             }
             this.animate_img();
         },
         // 滚轮监听事件
         mouse_wheel(e) {
             if (e.wheelDelta > 0) {
-                this.right()
+                this.right();
             } else if (e.wheelDelta < 0) {
-                this.left()
+                this.left();
             }
         },
         // 开始轮播
         start_time() {
             if (this.lunboTime !== null) {
-                this.timebar= setInterval(this.time_set, this.lunboTime);
-            } 
+                this.timebar = setInterval(this.time_set, this.lunboTime);
+            }
         },
         // 清除定时器
         clear_interval() {
@@ -128,86 +127,86 @@ export default {
         },
         // 鼠标按下事件
         mouse_down(e) {
-            this.clear_interval() // 清空定时器
-            this.boxs.style.transition = 'none' // 将动画清掉，以避免鼠标移动时卡顿
+            this.clear_interval(); // 清空定时器
+            this.boxs.style.transition = 'none'; // 将动画清掉，以避免鼠标移动时卡顿
             this.startY = e.clientY; // 记录开始位置
             this.boxs.addEventListener('mousemove', this.mouse_move); // 移动监听
             document.addEventListener('mouseup', this.mouse_up); // 鼠标谈起监听
         },
         // 鼠标弹起事件
         mouse_up(e) {
-            const _height = this.container.clientHeight
+            const _height = this.container.clientHeight;
             this.endY = e.clientY; // 记录最终位置
-            this.boxs.style.transition = 'all .5s' // 动画恢复
+            this.boxs.style.transition = 'all .5s'; // 动画恢复
             if (this.endY - this.startY <= -(_height / 2)) { // 如果最终位置-开始位置大于图片的一半，则切换图片
                 this.index++;
-                if(this.index >= this.imgList.length){
+                if (this.index >= this.imgList.length){
                     this.index = this.imgList.length - 1;
                 }
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             } else if (this.endY - this.startY >= (_height / 2)) { // 如果最终位置-开始位置大于图片的一半，则切换图片
                 this.index--;
-                if(this.index < 0){
+                if (this.index < 0){
                     this.index = 0;
                 }
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             } else { // 如果小于，则恢复初始位置
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             }
             this.boxs.removeEventListener('mousemove', this.mouse_move); // 移除鼠标移动事件
             document.removeEventListener('mouseup', this.mouse_up); // 移除鼠标弹起事件
         },
         mouse_move(e) { // 鼠标移动事件，设置图片移动距离
-            const _height = this.container.clientHeight
+            const _height = this.container.clientHeight;
             methods.css(this.boxs, {
-                transform: `translateY(${(-this.index * _height + e.clientY - this.startY)}px)`,
-            })
+                transform: `translateY(${(-this.index * _height + e.clientY - this.startY)}px)`
+            });
         },
         left(){ // 左箭头点击事件
             // 关闭定时器
-            this.clear_interval()
+            this.clear_interval();
             this.index--;
-            if(this.index < 0){
+            if (this.index < 0){
                 this.index = this.imgList.length - 1;
             }
             // 轮播方法，参数为定时器名称
-            this.animate_img(this.start_time)
+            this.animate_img(this.start_time);
         },
         right(){ // 右箭头点击事件
             // 关闭定时器
-            this.clear_interval()
+            this.clear_interval();
             this.index++;
-            if(this.index >= this.imgList.length){
+            if (this.index >= this.imgList.length){
                 this.index = 0;
             }
-            this.animate_img(this.start_time)
+            this.animate_img(this.start_time);
         },
         animate_img(fn){ // 底部span切换
-            const _height = this.container.clientHeight
+            const _height = this.container.clientHeight;
             methods.css(this.boxs, {
-                transform: `translateY(${(-this.index * _height)}px)`,
-            })
+                transform: `translateY(${(-this.index * _height)}px)`
+            });
             for (let i = 0; i < this.smallBtn.length; i++) {
                 if (i === +this.index) {
-                    this.smallBtn[i].setAttribute('class','choose')
+                    this.smallBtn[i].setAttribute('class', 'choose');
                 } else {
-                    this.smallBtn[i].setAttribute('class', '')
+                    this.smallBtn[i].setAttribute('class', '');
                 }
             }
-            if(fn){
-                fn()
+            if (fn){
+                fn();
             }
         },
         change_img(e) { // 点击底部span的回调，使用事件委托
-            if (e.target.id !=='') {
+            if (e.target.id !== '') {
                 // 关闭定时器
-                this.clear_interval()
+                this.clear_interval();
                 this.index = e.target.id;
-                this.animate_img(this.start_time)
+                this.animate_img(this.start_time);
             }
         }
     }
-}
+};
 </script>
 
 <style lang="scss" scoped>

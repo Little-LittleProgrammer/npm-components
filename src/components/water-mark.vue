@@ -40,11 +40,13 @@ export default {
             }
         };
         Methods.htmlTocanvas($dom, option).then(($canvas) => {
+            // 监听元素
             this.listen_dom($canvas);
+            this.listen_css($canvas);
         });
     },
     methods: {
-        listen_dom($dom) { //
+        listen_dom($dom) { // 监听元素是否被删除
             // 观察器的配置（需要观察什么变动）
             const config = { attributes: true, childList: true, subtree: true };
             // 当观察到变动时执行的回调函数
@@ -61,6 +63,22 @@ export default {
             const observer = new MutationObserver(callback);
             // 以上述配置开始观察目标节点
             observer.observe(this.$refs['ref-watermark'], config);
+        },
+        listen_css($dom) { // 监听元素的css变化
+            const observer = new MutationObserver(function(mutations) { // 监听css变化, 防止去除canvas标签
+                mutations.forEach(function(mutation) {
+                    if (mutation.type == 'attributes') {
+                        console.log('css changed', mutation);
+                        $dom.style.display = 'block';
+                        $dom.style.opacity = '1';
+                        $dom.style.visibility = 'visible';
+                    }
+                });
+            });
+            observer.observe($dom, {
+                attributes: true, // 将其配置为侦听属性更改,
+                attributeFilter: ['style'] // 监听style属性
+            });
         }
     }
 };

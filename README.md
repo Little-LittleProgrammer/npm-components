@@ -28,13 +28,14 @@ npm run lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-### description
-Although the name is Ant-Design-Vue, it is not used anywhere except for the table, and can be used by any framework
-虽然名字叫ant-design-vue,但是除了table使用了ant-design外，其他地方都没有使用，任何框架都可以使用
+### document description
+See [document description](https://blog.csdn.net/qq_44480414?spm=1000.2115.3001.5343).
 
 ### components
 1、htmlToCanvas
-2、轮播图组件（移动端和pc端）
-3、拖拽组件
-4、淘宝pc端图片放大器
-5、下拉框组件
+2、水印组件
+3、轮播图组件（移动端和pc端）
+4、拖拽组件
+5、淘宝pc端图片放大器
+6、下拉框组件
+

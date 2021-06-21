@@ -1,7 +1,7 @@
 <template>
     <div class="qm-container" ref="ref-qm-container" :class="size">
         <div class="qm-select-header" :class="{'focus': selectStyle.length===2}">
-            <div class="select-tag" v-if="type==='multiple'">
+            <div class="select-tag">
                 <span v-if="selectVal.length >=1">{{selectVal[0].label}}</span>
                 <span v-if="selectVal.length>1">+{{selectVal.length-1}}</span>
             </div>
@@ -12,43 +12,30 @@
             <div class="arrow-bottom" v-else></div>
         </div>
         <div class="qm-select-container" ref="ref-qm-select-container" :class="selectStyle">
-            <div v-if="type === 'default' ">
-                <!-- loading图标通过下拉框是否为空，和loading属性共同判断 -->
-                <div v-if="selectAllList.length === 0 && loading" class="loading">
-                    <span v-for="item in 5" :key="item"></span>
-                </div>
-                <div v-else class="default-select" ref="ref-default-select">
-                    <div v-for="(item,index) in selectList" :key="index" class="default-item" :class="{choose:chooseItem(item)}" @mousedown="add_selected_list(item)">
-                        <span>{{item.label}}</span>
-                    </div>
-                </div>
+            <div v-if="selectAllList.length === 0 && loading" class="loading">
+                <span v-for="item in 5" :key="item"></span>
             </div>
             <div v-else>
-                <div v-if="selectAllList.length === 0 && loading" class="loading">
-                    <span v-for="item in 5" :key="item"></span>
+                <div class="multiple-title">
+                    <span>全部选项列表</span>
+                    <span></span>
+                    <span>已选择选项列表</span>
                 </div>
-                <div v-else>
-                    <div class="multiple-title">
-                        <span>全部选项列表</span>
-                        <span></span>
-                        <span>已选择选项列表</span>
+                <div class="select-multiple">
+                    <div class="multiple-all" ref="ref-multiple-all">
+                        <div v-for="(item,index) in selectList" :key="index" class="multiple-item" :class="{choose:chooseItem(item)}" @click="add_selected_list(item)">
+                            <span>{{item.label}}</span>
+                            <span class="icon" v-if="chooseItem(item)">&#10003;</span>
+                        </div>
                     </div>
-                    <div class="select-multiple">
-                        <div class="multiple-all" ref="ref-multiple-all">
-                            <div v-for="(item,index) in selectList" :key="index" class="multiple-item" :class="{choose:chooseItem(item)}" @click="add_selected_list(item)">
-                                <span>{{item.label}}</span>
-                                <span class="icon" v-if="chooseItem(item)">&#10003;</span>
-                            </div>
-                        </div>
-                        <div class="multiple-middle">
-                            <!-- <button>全选</button> -->
-                            &#8644;
-                        </div>
-                        <div class="multiple-selected" ref="ref-multiple-selected">
-                            <div v-for="(item, index) in selectVal" :key="index" class="selected-item" @click="cancel_check(item)">
-                                <span>{{item.label}}</span>
-                                <span class="icon">&#10003;</span>
-                            </div>
+                    <div class="multiple-middle">
+                        <!-- <button>全选</button> -->
+                        &#8644;
+                    </div>
+                    <div class="multiple-selected" ref="ref-multiple-selected">
+                        <div v-for="(item, index) in selectVal" :key="index" class="selected-item" @click="cancel_check(item)">
+                            <span>{{item.label}}</span>
+                            <span class="icon">&#10003;</span>
                         </div>
                     </div>
                 </div>
@@ -63,34 +50,22 @@ export default {
     name: 'QmSelectBigData',
     props: {
         selectAllList: { // 下拉框数据
-            type: Array,
-            require: true
-        },
-        type: { // 下拉框类型：单选'default'，多选'multiple'
-            type: String,
-            default: 'default'
+            type: Array
         },
         size: { // 下拉框尺寸,
-            type: Array,
-            default: function() {
-                return ['w-200', 'h-35'];
-            }
+            type: Array
         },
         async: { // 异步同步，async:异步(分页查找)，sync:同步(一次性全部查找完成)
-            type: String,
-            default: 'sync'
+            type: String
         },
         pageSize: { // 页面大小
-            type: Number,
-            default: 100
+            type: Number
         },
         defaultCheckedList: { // 是否有默认选中值
-            type: Array,
-            default: () => []
+            type: Array
         },
         placeholder: {
-            type: String,
-            default: '请选择'
+            type: String
         }
     },
     model: {
@@ -99,12 +74,8 @@ export default {
     },
     computed: {
         getPlacehorder() {
-            if (this.type === 'multiple') {
-                if (this.selectVal.length >= 1) {
-                    return '';
-                } else {
-                    return this.placeholder;
-                }
+            if (this.selectVal.length >= 1) {
+                return '';
             } else {
                 return this.placeholder;
             }
@@ -135,23 +106,9 @@ export default {
         defaultCheckedList: { // 默认的选择数据
             immediate: true,
             handler(val) {
-                if (this.type === 'multiple') {
-                    if (val.length !== 0) {
-                        this.placeholder = '';
-                        this.selectVal = this.defaultCheckedList;
-                    }
-                } else if (this.type === 'default') {
-                    this.searchData = this.defaultCheckedList;
-                }
-            }
-        },
-        type: {
-            immediate: true,
-            handler(val) {
-                if (val === 'default') {
-                    this.selectVal = {};
-                } else {
-                    this.selectVal = [];
+                if (val.length !== 0) {
+                    this.placeholder = '';
+                    this.selectVal = this.defaultCheckedList;
                 }
             }
         }
@@ -164,7 +121,7 @@ export default {
             },
             scrollLock: false, // 限流锁
             selectList: [],
-            selectVal: undefined,
+            selectVal: [],
             searchData: '',
             selectStyle: [], // 第一个值是宽度，第二个值是动画
             loading: true
@@ -175,23 +132,19 @@ export default {
         if (this.async === 'async') {
             this.$emit('findSelectList', this.scrollPageState.scrollPage, this.searchData);
         }
-        if (this.type === 'multiple') {
-            const _cache = this.size[0];
-            const num = +_cache.replace(/^\D+/g, '');
-            const str = 'w-' + num * 2.5; // 复选框的宽度大1.5倍
-            this.selectStyle = [str];
-            // const $dom = document.getElementsByClassName('qm-container');
-            // const $domSelect = document.getElementsByClassName('qm-select-container');
-            const $dom = this.$refs['ref-qm-container'];
-            const $domSelect = this.$refs['ref-qm-select-container'];
-            const _resurt = methods.offset($dom);
-            if (document.documentElement.clientWidth - _resurt.left < 500) {
-                $domSelect.style.right = 0;
-            } else {
-                $domSelect.style.left = 0;
-            }
+        const _cache = this.size[0];
+        const num = +_cache.replace(/^\D+/g, '');
+        const str = 'w-' + num * 2.5; // 复选框的宽度大1.5倍
+        this.selectStyle = [str];
+        // const $dom = document.getElementsByClassName('qm-container');
+        // const $domSelect = document.getElementsByClassName('qm-select-container');
+        const $dom = this.$refs['ref-qm-container'];
+        const $domSelect = this.$refs['ref-qm-select-container'];
+        const _resurt = methods.offset($dom);
+        if (document.documentElement.clientWidth - _resurt.left < 500) {
+            $domSelect.style.right = 0;
         } else {
-            this.selectStyle = [this.size[0]];
+            $domSelect.style.left = 0;
         }
     },
     methods: {
@@ -201,15 +154,14 @@ export default {
             if (this.selectAllList.length !== 0) { // 当有数据时，开启监听
                 this.listen_select_scroll();
             }
-            if (this.type === 'multiple') { // 多选时，监听鼠标的按钮按下，来判断焦点
-                document.addEventListener('mousedown', this.mouse_event);
-            }
+            // 多选时，监听鼠标的按钮按下，来判断焦点
+            document.addEventListener('mousedown', this.mouse_event);
         },
 
         // 阻止焦点移除
         mouse_event(e) {
             // 针对这块，千万不要将类名命名重名
-            if (e.target.offsetParent.className.includes('qm-select-container') || e.target.offsetParent.className.includes('multiple-item') || e.target.offsetParent.className.includes('selected-item')) {
+            if (e.target.offsetParent?.className.includes('qm-select-container') || e.target.offsetParent?.className.includes('multiple-item') || e.target.offsetParent?.className.includes('selected-item')) {
                 e.preventDefault();
             }
         },
@@ -218,56 +170,33 @@ export default {
         close_select_container() {
             this.selectStyle.splice(1, 1); // 删除数组第二个值
             this.reset_select_list();
-            if (this.type === 'default') {
-                if (this.selectAllList.length !== 0) { // 如果下拉框有数据
-                    // const $domAll = document.getElementsByClassName('default-select')[this.num];
-                    const $domAll = this.$refs['ref-default-select'];
-                    $domAll.removeEventListener('scroll', this.listen_scroll);
-                }
-            } else {
-                document.removeEventListener('mousedown', this.mouse_event);
-                if (this.selectAllList.length !== 0) {
-                    // const $domAll = document.getElementsByClassName('multiple-all')[this.num];
-                    const $domAll = this.$refs['ref-multiple-all'];
-                    $domAll.removeEventListener('scroll', this.listen_scroll);
-                }
+            document.removeEventListener('mousedown', this.mouse_event);
+            if (this.selectAllList.length !== 0) {
+                // const $domAll = document.getElementsByClassName('multiple-all')[this.num];
+                const $domAll = this.$refs['ref-multiple-all'];
+                $domAll.removeEventListener('scroll', this.listen_scroll);
             }
         },
 
         // 已选择的样式
         chooseItem(item) {
-            if (this.type === 'multiple') {
-                return this.selectVal.find(e => e === item);
-            } else {
-                return this.selectVal === item;
-            }
+            return this.selectVal.find(e => e === item);
         },
 
         // 监听滚动事件
         listen_select_scroll() {
-            if (this.type === 'default') {
-                // const $domAll = document.getElementsByClassName('default-select')[this.num];
-                const $domAll = this.$refs['ref-default-select'];
-                $domAll.addEventListener('scroll', this.listen_scroll);
-            } else {
-                // const $domAll = document.getElementsByClassName('multiple-all')[this.num];
-                const $domAll = this.$refs['ref-multiple-all'];
-                $domAll.addEventListener('scroll', this.listen_scroll);
-            }
+            // const $domAll = document.getElementsByClassName('multiple-all')[this.num];
+            const $domAll = this.$refs['ref-multiple-all'];
+            $domAll.addEventListener('scroll', this.listen_scroll);
         },
 
         // 往已选择框内推数据
         add_selected_list(item) { // 确定选择的内容
-            if (this.type === 'multiple') {
-                const _index = this.selectVal.indexOf(item);
-                if (_index !== -1) { // 判断是否已被选择
-                    this.selectVal.splice(_index, 1);
-                } else {
-                    this.selectVal.push(item);
-                }
+            const _index = this.selectVal.indexOf(item);
+            if (_index !== -1) { // 判断是否已被选择
+                this.selectVal.splice(_index, 1);
             } else {
-                this.selectVal = item;
-                this.searchData = item.label;
+                this.selectVal.push(item);
             }
         },
 
@@ -289,13 +218,9 @@ export default {
         // 失去焦点时，重置下拉框
         reset_select_list() {
             this.$nextTick(() => {
-                if (this.type === 'default') {
-                    this.$emit('selectData', this.selectVal); // 单选情况下 返回筛选的数据
-                } else {
-                    if (this.selectAllList.length !== 0) {
-                        console.log('select', this.selectVal);
-                        this.$emit('selectData', this.selectVal); // 多选情况下 返回筛选的数据列表
-                    }
+                if (this.selectAllList.length !== 0) {
+                    console.log('select', this.selectVal);
+                    this.$emit('selectData', this.selectVal); // 多选情况下 返回筛选的数据列表
                 }
                 this.scrollPageState.scrollPage = 0;
                 this.searchData = '';
@@ -346,11 +271,7 @@ export default {
         clear_all() {
             this.selectVal = [];
             this.searchData = '';
-            if (this.type === 'default') {
-                this.$emit('selectData', this.searchData);
-            } else {
-                this.$emit('selectData', this.selectVal);
-            }
+            this.$emit('selectData', this.selectVal);
         }
 
     }

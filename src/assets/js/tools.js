@@ -596,21 +596,6 @@ methods.htmlTocanvas = (dom, options) => {
     }
     const ctx = $canvas.getContext('2d');
 
-    const observer = new MutationObserver(function(mutations) { // 监听css变化, 防止去除canvas标签
-        mutations.forEach(function(mutation) {
-            if (mutation.type == 'attributes') {
-                console.log('css changed', mutation);
-                $canvas.style.display = 'block';
-                $canvas.style.opacity = '1';
-                $canvas.style.visibility = 'visible';
-            }
-        });
-    });
-    observer.observe($canvas, {
-        attributes: true, // 将其配置为侦听属性更改,
-        attributeFilter: ['style'] // 监听style属性
-    });
-
     async function init_main() { // 主方法
         const data = await get_svg_dom_string(dom);
         // const DOMURL = window.URL || window.webkitURL || window;
@@ -785,7 +770,6 @@ methods.dragElement = (dom, parentDom) => {
     let startX = 0; let startY = 0;
     const positonByHtml = methods.offset(parentDom);
     let old = dom.style.transform;
-    console.log(old);
     old = old.replace(/[^0-9-]/g, ' ').split(' ').filter(item => item !== '');
     if (old.length === 0) {
         old = [0, 0];

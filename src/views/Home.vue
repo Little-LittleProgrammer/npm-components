@@ -9,8 +9,8 @@
 <template>
   <div class="home">
     <!-- multiple -->
-    <big-select :selectAllList="list" async="async" type="multiple" :defaultCheckedList="defaultCheckedList"></big-select>
-    <big-select v-model="defaultCheckedList" style="margin-left:700px" :selectAllList="list" type="multiple"></big-select>
+    <big-select :selectAllList="list" :defaultChecked="defaultChecked"></big-select>
+    <big-select v-model="defaultCheckedList" :selectAllList="list" type="multiple"></big-select>
 
   </div>
 </template>
@@ -28,7 +28,8 @@ export default {
         return {
             list: [],
             show: '',
-            defaultCheckedList: []
+            defaultCheckedList: [],
+            defaultChecked: '123123123'
         };
     },
     async mounted() {
@@ -49,12 +50,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.test-div {
-  width: 100px;
-  height: 100px;
-  background-color: #000;
-  .test-span {
-    color: red;
-  }
+.home {
+  display: flex;
+  padding: 0 40px;
+  justify-content: space-between;
 }
 </style>
