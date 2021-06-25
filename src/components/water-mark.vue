@@ -6,7 +6,7 @@
         <slot :name="content">
             <div class="error-warning">
                 <img id="forbidImg" src="../assets/images/forbidden.jpg" alt="" srcset="">
-                <p>请勿删除水印!!!</p>
+                <p>请勿删除或隐藏水印!!!</p>
             </div>
         </slot>
     </div>
@@ -52,6 +52,7 @@ export default {
             // 当观察到变动时执行的回调函数
             const callback = (mutationsList, observer) => {
                 for (const mutation of mutationsList) {
+                    console.log(mutation);
                     if (mutation.removedNodes[0] === $dom) {
                         this.content = '';
                         // 停止观察
@@ -65,19 +66,26 @@ export default {
             observer.observe(this.$refs['ref-watermark'], config);
         },
         listen_css($dom) { // 监听元素的css变化
-            const observer = new MutationObserver(function(mutations) { // 监听css变化, 防止去除canvas标签
-                mutations.forEach(function(mutation) {
-                    if (mutation.type == 'attributes') {
+            const callback = (mutationsList, observer) => { // 监听css变化, 防止去除canvas标签
+                mutationsList.forEach((mutation) => {
+                    if (mutation.type == 'attributes' && mutation.attributeName === 'style') {
                         console.log('css changed', mutation);
                         $dom.style.display = 'block';
                         $dom.style.opacity = '1';
                         $dom.style.visibility = 'visible';
                     }
+                    if (mutation.type == 'attributes' && mutation.attributeName === 'class') {
+                        console.log('className changed', mutation);
+                        this.content = '';
+                        // 停止观察
+                        observer.disconnect();
+                    }
                 });
-            });
+            };
+            const observer = new MutationObserver(callback);
             observer.observe($dom, {
                 attributes: true, // 将其配置为侦听属性更改,
-                attributeFilter: ['style'] // 监听style属性
+                attributeFilter: ['style', 'class'] // 监听style属性
             });
         }
     }

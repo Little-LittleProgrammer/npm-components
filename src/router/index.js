@@ -43,6 +43,11 @@ const routes = [
         path: '/qm-swiper-app',
         name: 'QmSwiperApp',
         component: () => import(/* webpackChunkName: "about" */ '../views/qm-swiper-app.vue')
+    },
+    {
+        path: '/3d-house',
+        name: '3dHouse',
+        component: () => import(/* webpackChunkName: "about" */ '../views/3d-house.vue')
     }
 ];
 
