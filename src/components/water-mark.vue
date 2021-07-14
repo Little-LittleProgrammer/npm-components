@@ -52,7 +52,6 @@ export default {
             // 当观察到变动时执行的回调函数
             const callback = (mutationsList, observer) => {
                 for (const mutation of mutationsList) {
-                    console.log(mutation);
                     if (mutation.removedNodes[0] === $dom) {
                         this.content = '';
                         // 停止观察

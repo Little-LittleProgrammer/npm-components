@@ -2,14 +2,14 @@
     <div>
         <big-select-mutiple
             v-if="type === 'multiple'"
+            :defaultCheckedList="defaultChecked"
             :selectAllList="selectAllList"
             :size="size"
             :async="async"
             :pageSize="pageSize"
-            :defaultCheckedList="defaultCheckedList"
             :placeholder = "placeholder"
-            @findSelectList="findSelectList"
-            @selectData="selectData"
+            @findSelectList="find_select_list"
+            @returnSelectData="select_data"
         ></big-select-mutiple>
         <big-select-single
             v-else
@@ -19,7 +19,8 @@
             :pageSize="pageSize"
             :defaultChecked="defaultChecked"
             :placeholder = "placeholder"
-            @selectData="selectData"
+            @returnSelectData="select_data"
+            @findSelectList="find_select_list"
         ></big-select-single>
     </div>
 </template>
@@ -29,6 +30,10 @@ import BigSelectMutiple from './components/big-select-mutiple.vue';
 import BigSelectSingle from './components/big-select-single.vue';
 export default {
     name: 'BigSelect',
+    model: {
+        prop: 'defaultChecked',
+        event: 'returnSelectData'
+    },
     props: {
         selectAllList: {
             // 下拉框数据
@@ -55,16 +60,10 @@ export default {
         pageSize: {
             // 页面大小
             type: Number,
-            default: 100
-        },
-        defaultCheckedList: {
-            // 是否有默认选中值
-            type: Array,
-            default: () => []
+            default: 50
         },
         defaultChecked: {
-            type: String,
-            default: ''
+
         },
         placeholder: {
             type: String,
@@ -74,17 +73,19 @@ export default {
     data() {
         return {};
     },
+    computed: {
+    },
     components: {
         BigSelectMutiple,
         BigSelectSingle
     },
     mounted() {},
     methods: {
-        selectData(val) {
-            this.$emit('selectData', val);
+        select_data(val) {
+            this.$emit('returnSelectData', val);
         },
-        findSelectList(page, data) {
-            this.$emit('findSelectList', page, data);
+        find_select_list(obj) {
+            this.$emit('findSelectList', obj);
         }
     }
 };
