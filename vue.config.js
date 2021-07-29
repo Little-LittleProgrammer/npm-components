@@ -20,6 +20,13 @@ module.exports = {
                 return args;
             });
         }
+    },
+    css: {
+        loaderOptions: {
+            sass: {
+                prependData: `@import "@/assets/style/global.scss";`
+            }
+        }
     }
 };
 // if (process.env.NODE_ENV === 'production') {

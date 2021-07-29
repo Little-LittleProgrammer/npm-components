@@ -1,0 +1,81 @@
+// $primary-color: #E6A817; // 全局主色
+// $link-color: #D99116;    // 链接色
+$primary-color: #E09D16; // 全局主色
+$link-color: #CC7400;    // 链接色
+$success-color: #12B262; // 成功色
+$warning-color: #FCA000; // 警告色
+$error-color: #f5222d; // 错误色
+$font-size-base: 14px; // 主字号
+$heading-color: #222; // 标题色 rgba(0, 0, 0, 0.85)
+$text-color: #222; // 主文本色 rgba(0, 0, 0, 0.85)
+$text-color-secondary: #666;  // 次文本色 rgba(0, 0, 0, 0.65)
+$disabled-color: #bbb; // 失效色 rgba(0, 0, 0, 0.25)
+$border-radius-base: 4px; // 组件/浮层圆角
+$border-color-base: #d9d9d9; // 边框色
+$box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.15); // 浮层阴影
+// antdend
+
+// 土黄色配置
+// $primary-color: #E09D16;
+// $link-color: #CC7400;
+
+// 绿色配置
+// $primary-color: #24b383;
+// $link-color: #00A66F;
+
+// 橙色配置
+// $primary-color: #FAA000;
+// $link-color: #CC6D29;
+
+// 蓝色配置
+// $primary-color: #337EFF; // 全局主色 
+// $link-color: #1E6FFA; // 链接色
+
+$space: 8px;                                 // 全站默认间距
+
+$body-bg: #fff;                          // 全站背景色
+$important-color: #f5222d;
+$important-second-color: $warning-color;
+$table-th-bg: #f0f0f0;                      //  表格表头背景色
+$table-even-bg: #fcfcfc;                        //  表格隔行背景色
+
+// header
+$header-height: 48px;                                         // header高度
+$header-bg: #333;                                           // header背景色
+$header-system-color: #fff;                                 // 系统名颜色
+$header-system-size: 20px;                                      // 系统名文字大小
+$header-tabs-size: 16px;                                       // tab文字大小
+$header-tabs-color: #fff;                                   // tab文字背景色
+$header-tabs-hover-color: #fff;                             // hover文字颜色
+$header-tabs-hover-bg: rgba(255,255,255,0.06);               // hover背景色
+$header-tabs-cur-color: #fff;                               // 选中tab文字背景色
+$header-tabs-cur-bg: rgba(255,255,255,0.12);                 // 选中tab背景色
+$header-environment-color: #FCC800;                         // 环境提示文案颜色
+$header-environment-size: 16px;                                 // 环境提示文案字体大小
+
+//aside
+$aside-bg: #F5F5F5;                                               // 左侧栏背景色
+$aside-height: 40px;                                                // 右侧导航高度
+$aside-tabs-size: 14px;                                             // tab文字大小
+$aside-tabs-color: $heading-color;                                          // tab文字颜色
+$aside-tabs-hover-bg: transparent;                                  // tab hover背景色
+$aside-tabs-hover-color: $link-color;                                 // tab hover文字颜色
+$aside-tabs-cur-bg: $primary-color;                                      // tab 选中背景色
+$aside-tabs-cur-color: #fff;                                        // tab 选中文字颜色
+$aside-right-border-color: $border-color-base;                                 // 边框颜色
+$aside-padding: 12px;                                                 
+$aside-width: 160px;                                                // 导航栏宽度
+$aside-project-select-bg: #E8E8E8;                                  // 项目选择背景色
+
+
+%cf,%clearfix {
+    &:before {
+        content: "";
+        display: table;
+    }
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+}

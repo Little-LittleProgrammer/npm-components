@@ -1,62 +1,61 @@
 <template>
     <div class="container" ref="ref-container" :class="size">
-        <div class="select-header" :class="{'focus': selectStyle.length===2}">
+        <div class="select-header" :class="{'focus': selectClass.length===1}">
             <div class="select-tag">
                 <span v-if="selectVal.length >=1">{{selectVal[0].label}}</span>
                 <span v-if="selectVal.length>1">+{{selectVal.length-1}}</span>
             </div>
             <div class="select-input">
-                <input type="text" :placeholder="getPlacehorder" v-model="searchData" :class="size" v-on:input="get_select" @focus="open_select_container" @blur="close_select_container">
+                <input :disabled="disabled" type="text" :placeholder="getPlacehorder" v-model="searchData" v-on:input="get_select" @focus="open_select_container" @blur="close_select_container">
             </div>
             <div class="font-icon">
-                <icon-delete class="clear-all" v-if="selectVal.length != 0 || searchData !=''" @click="clear_all"></icon-delete>
+                <icon-delete class="clear-all" v-if="!disabled && (selectVal.length != 0 || searchData !='')" @click="clear_all"></icon-delete>
                 <div class="arrow-bottom" :class="{'rotate': rotateFlag}"></div>
             </div>
         </div>
-        <div class="select-container" ref="ref-select-container" :class="selectStyle">
-            <div v-show="selectListCache.length === 0 && loading" class="loading-container">
-                <qm-loading :loading="true" size="small"></qm-loading>
-            </div>
-            <div v-show="!(selectListCache.length === 0 && loading)">
-                <div class="multiple-title">
-                    <span>全部选项列表</span>
-                    <span></span>
-                    <span>已选择选项列表</span>
-                </div>
-                <div class="select-multiple">
-                    <div class="multiple-all" ref="ref-multiple-all">
-                        <template v-if="selectList.length !== 0">
-                            <div v-for="(item,index) in selectList" :key="index" class="multiple-item" :class="{choose:chooseItem(item)}" @click="add_selected_list(item)">
-                                <span class="text">{{item.label}}</span>
-                                <span class="icon" v-if="chooseItem(item)">&#10003;</span>
+        <div class="select-container" ref="ref-select-container" :class="selectClass" :style="selectStyle">
+            <q-loading :loading="selectListCache.length === 0 && loading && rotateFlag" size="small">
+                <div v-show="!(selectListCache.length === 0 && loading)">
+                    <div class="multiple-title">
+                        <span>全部选项列表</span>
+                        <span></span>
+                        <span>已选择选项列表</span>
+                    </div>
+                    <div class="select-multiple">
+                        <div class="multiple-all" ref="ref-multiple-all">
+                            <template v-if="selectList.length !== 0">
+                                <div v-for="(item,index) in selectList" :key="index" class="multiple-item" :class="{choose:chooseItem(item)}" @click="add_selected_list(item)">
+                                    <span class="text" :title="item.label">{{item.label}}</span>
+                                    <span class="icon" v-show="chooseItem(item)">&#10003;</span>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <p class="none-data">暂无数据</p>
+                            </template>
+                            <div class="spinning" v-if="bottomLoading">
+                                <span></span>
+                                <span></span>
+                                <span></span>
                             </div>
-                        </template>
-                        <template v-else>
-                            <p class="none-data">暂无数据</p>
-                        </template>
-                        <div class="spinning" v-if="bottomLoading">
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                        </div>
+                        <div class="multiple-middle">
+                            <!-- <button>全选</button> -->
+                            &#8644;
+                        </div>
+                        <div class="multiple-selected" ref="ref-multiple-selected">
+                            <template v-if="selectVal.length !== 0">
+                                <div v-for="(item, index) in selectVal" :key="index" class="selected-item" @click="cancel_check(item)">
+                                    <span :title="item.label">{{item.label}}</span>
+                                    <span class="icon">&#10003;</span>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <p class="none-data">暂无数据</p>
+                            </template>
                         </div>
                     </div>
-                    <div class="multiple-middle">
-                        <!-- <button>全选</button> -->
-                        &#8644;
-                    </div>
-                    <div class="multiple-selected" ref="ref-multiple-selected">
-                        <template v-if="selectVal.length !== 0">
-                            <div v-for="(item, index) in selectVal" :key="index" class="selected-item" @click="cancel_check(item)">
-                                <span>{{item.label}}</span>
-                                <span class="icon">&#10003;</span>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <p class="none-data">暂无数据</p>
-                        </template>
-                    </div>
                 </div>
-            </div>
+            </q-loading>
         </div>
     </div>
 </template>
@@ -64,6 +63,7 @@
 <script>
 import methods from '@/assets/js/tools';
 import iconDelete from '@/components/vue-icon/icon-delete';
+
 export default {
     name: 'QmSelectBigData',
     props: {
@@ -71,7 +71,7 @@ export default {
             type: Array
         },
         size: { // 下拉框尺寸,
-            type: Array
+            type: String
         },
         async: { // 异步同步，async:异步(分页查找)，sync:同步(一次性全部查找完成)
             type: String
@@ -84,6 +84,9 @@ export default {
         },
         placeholder: {
             type: String
+        },
+        disabled: {
+            type: Boolean
         }
     },
     components: { iconDelete },
@@ -99,7 +102,7 @@ export default {
     watch: {
         selectAllList: { // 监听下拉框数据
             immediate: true,
-            handler(val){
+            handler(val) {
                 if (this.watchFlag) {
                     if (this.async === 'sync') { // 同步时的方法
                         this.loading = true;
@@ -113,14 +116,16 @@ export default {
                         this.selectListCache = val; // _selectList是全部的缓存，selectList是筛选到的要渲染的list，selectAllList就是全部
                         this.selectList = val.slice(0, this.scrollPageState.pageSize);
                         // 下拉框列表后加载的情况
-                        this.selectVal = val.filter(item => this.defaultCheckedList.join('&*^').includes(item.value));
+                        this.selectVal = val?.filter((item) => {
+                            return this.defaultCheckedList?.some((e) => e == item.value);
+                        });
                     } else { // 异步时的方法
                         this.selectListCache = [...new Set([...this.selectListCache, ...val])];
                         this.selectList = this.selectListCache;
                         if (val.length < this.pageSize) {
                             this.bottomLoading = false;
                         } else {
-                        // 防止 immediate 时 val.length = 0,造成this.bottomLoading = false;
+                            // 防止 immediate 时 val.length = 0,造成this.bottomLoading = false;
                             this.bottomLoading = true;
                         }
                     }
@@ -132,7 +137,9 @@ export default {
             handler(val) {
                 // 下拉框列表先加载的情况
                 if (this.async === 'sync') {
-                    this.selectVal = this.selectAllList?.filter(item => val.join('&*^').includes(item.value));
+                    this.selectVal = this.selectAllList?.filter((item) => {
+                        return val?.some((e) => e == item.value);
+                    });
                 } else {
                     // 同步情况暂无默认值
                 }
@@ -149,7 +156,8 @@ export default {
             selectList: [],
             selectVal: [],
             searchData: '',
-            selectStyle: [], // 第一个值是宽度，第二个值是动画
+            selectClass: [], // 第一个值是宽度，第二个值是动画
+            selectStyle: {}, // 宽度和定位
             loading: true,
             rotateFlag: false,
             interval: '', // 定时器
@@ -161,28 +169,26 @@ export default {
     },
     mounted() { // 开始吧一些样式定好
         this.scrollPageState.pageSize = this.pageSize;
-        const _cache = this.size[0];
-        let _num = +_cache.replace(/^\D+/g, '');
-        // 复选框的宽度, 当选择框的宽度小于500时，为500，当选择框的宽度大于500时，为选择框的宽度
-        _num = _num <= 500 ? '500' : _num;
-        const _str = 'w-' + _num;
-        this.selectStyle = [_str];
         const $dom = this.$refs['ref-container'];
-        const $domSelect = this.$refs['ref-select-container'];
+        // 复选框的宽度, 当选择框的宽度小于500时，为500，当选择框的宽度大于500时，为选择框的宽度
+        const _cache = window.getComputedStyle($dom).width;
+        let _num = +_cache.replace(/\D+$/g, '');
+        _num = _num <= 500 ? '500' : _num;
+        this.selectStyle.width = `${_num}px`;
         const _resurt = methods.offset($dom);
         if (_num <= 500) {
             if (document.documentElement.clientWidth - _resurt.left < _num) {
-            // bug antdv中的a-tabs（有动画的情况）
-                $domSelect.style.right = 0;
+                // bug antdv中的a-tabs（有动画的情况）
+                this.selectStyle.right = 0;
             } else {
-                $domSelect.style.left = 0;
+                this.selectStyle.left = 0;
             }
         }
     },
     methods: {
-        // 打开搜索框
+    // 打开搜索框
         open_select_container() {
-            this.selectStyle.push('animation');
+            this.selectClass.push('animation');
             this.watchFlag = true;
             this.rotateFlag = true;
             if (this.async === 'async') {
@@ -206,7 +212,7 @@ export default {
         // 阻止焦点移除
         mouse_event(e) {
             // 针对这块，千万不要将类名命名重名
-            if (e.target.offsetParent?.className.includes('select-container') || e.target.offsetParent?.className.includes('multiple-item') || e.target.offsetParent?.className.includes('selected-item')) {
+            if (e.target.offsetParent?.className.includes('page-container') || e.target.offsetParent?.className.includes('select-container') || e.target.offsetParent?.className.includes('multiple-item') || e.target.offsetParent?.className.includes('selected-item')) {
                 e.preventDefault();
             }
         },
@@ -214,9 +220,11 @@ export default {
         // 关闭搜索框
         close_select_container() {
             clearInterval(this.interval);
-            this.selectStyle.pop(); // 删除数组第二个值
+            this.selectClass.pop(); // 删除数组第二个值
             this.rotateFlag = false;
-            this.watchFlag = false; // 监听selectAllList标志
+            if (this.async == 'async') {
+                this.watchFlag = false; // 监听selectAllList标志
+            }
             this.reset_select_list();
             document.removeEventListener('mousedown', this.mouse_event);
             if (this.selectListCache.length !== 0) {
@@ -227,8 +235,8 @@ export default {
         // 失去焦点时，重置下拉框
         reset_select_list() {
             this.$nextTick(() => {
-                console.log('select', this.selectVal.map(item => item.value));
-                this.$emit('returnSelectData', this.selectVal.map(item => item.value)); // 多选情况下 返回筛选的数据列表
+                console.log('select', this.selectVal.map((item) => item.value));
+                this.$emit('select', this.selectVal.map((item) => item.value)); // 多选情况下 返回筛选的数据列表
                 this.reset_value();
             });
         },
@@ -251,7 +259,7 @@ export default {
 
         // 已选择的样式
         chooseItem(item) {
-            return this.selectVal.find(e => e === item);
+            return this.selectVal.find((e) => e === item);
         },
 
         // 监听滚动事件
@@ -278,7 +286,7 @@ export default {
             this.reset_value();
             this.searchData = e.target.value;
             if (this.async == 'sync') {
-                this.selectListCache = this.selectAllList.filter(item => { // 过滤属性
+                this.selectListCache = this.selectAllList.filter((item) => { // 过滤属性
                     return String(item.label).indexOf(e.target.value) !== -1;
                 });
                 this.selectList = this.selectListCache.slice(0, this.scrollPageState.pageSize); // 并按照分页裁剪
@@ -304,7 +312,7 @@ export default {
         change_scroll(target) {
             if (this.oldScrollTop < target.scrollTop) {
                 this.oldScrollTop = Math.max(target.scrollTop, this.oldScrollTop);
-                if (target.clientHeight == target.scrollHeight - target.scrollTop) { // 当滚动到距离底部只有20px的时候，加载下一波
+                if (target.clientHeight == target.scrollHeight - target.scrollTop) {
                     this.scrollPageState.scrollPage += 1;
                     if (this.async === 'sync') {
                         this.selectList = [...this.selectList, ...this.selectListCache.slice(this.scrollPageState.scrollPage * this.scrollPageState.pageSize, (this.scrollPageState.scrollPage + 1) * this.scrollPageState.pageSize)];
@@ -328,7 +336,7 @@ export default {
         clear_all() {
             this.selectVal = [];
             this.searchData = '';
-            this.$emit('returnSelectData', this.selectVal);
+            this.$emit('select', this.selectVal);
         },
 
         // 滚动到默认选项入口，以后拓展
@@ -348,7 +356,7 @@ export default {
             const _obj = {
                 page: this.scrollPageState.scrollPage,
                 pageSize: this.scrollPageState.pageSize,
-                text: text};
+                text };
             this.$emit('findSelectList', _obj);
         }
 
@@ -357,6 +365,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 .loading-container {
     display: flex;
     align-items: center;
@@ -374,31 +383,47 @@ export default {
 }
 
 .container {
+    width: inherit;
+    vertical-align: middle;
     display: inline-block;
     position: relative;
     text-align: left;
+    * {
+        box-sizing: border-box;
+    }
 }
-
+.default {
+    height: 32px !important;
+}
+.small {
+    height: 24px !important;
+}
+.large {
+    height: 40px !important;
+}
 .focus {
-    border-color: rgb(66, 160, 251) !important;
-    box-shadow: 0 0 0 2px rgba(24,144,255, 0.2)
+    border-color: $primary-color !important;
+    box-shadow: 0 0 0 2px rgba(250, 160, 0, 0.2)
 }
 
 .select-header {
+    box-sizing: border-box;
     border: 1px solid #d9d9d9;
     border-radius: 4px;
     width: 100%;
     display: flex;
     align-items: center;
+    height: inherit;
     padding: 0 3px;
     &:hover {
-        border-color: rgb(66, 160, 251);
+        border-color: $primary-color;
         .clear-all {
             display: block !important;
         }
     }
     .select-input {
         flex:1;
+        line-height: 1;
         input {
             width: 100%;
             border: 0;
@@ -408,11 +433,12 @@ export default {
     .select-tag {
         display: flex;
         span {
+            line-height: 1;
             display: block;
             background-color: rgb(249, 249, 249);
             border: 1px solid #ccc;
             border-radius: 10%;
-            padding: 0 6px 0;
+            padding: 3px 6px;
             height: 50%;
             margin-right: 5px;
             overflow: hidden;
@@ -497,7 +523,7 @@ export default {
         display: flex;
         .none-data {
             text-align: center;
-            line-height: 250px;
+            line-height: 240px;
         }
         .multiple-all,
         .multiple-selected,
@@ -564,7 +590,7 @@ export default {
                     margin-left: -5px;
                     height: 10px;
                     width: 10px;
-                    background-color: #FFA000;
+                    background-color: $primary-color;
                     border-radius: 50%;
                     position: absolute;
                 }
@@ -602,7 +628,7 @@ export default {
                     position: absolute;
                     right: 26px;
                     width: 10px;
-                    color: #E6A817;
+                    color: $primary-color;
                 }
                 &:hover {
                     background-color:rgb(255, 251, 227);

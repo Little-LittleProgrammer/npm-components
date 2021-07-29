@@ -12,7 +12,7 @@
     <big-select v-model="defaultChecked" :selectAllList="listAsync" async="async" :pageSize="10" @findSelectList="get_list"></big-select>
     <big-select v-model="defaultCheckedList" :selectAllList="listAsync" async="async" type="multiple" :pageSize="10" @findSelectList="get_list"></big-select>
     <big-select v-model="defaultChecked2" :selectAllList="list" :pageSize="10" ></big-select>
-    <big-select :size="['w-200','h-40']" v-model="defaultCheckedList2" :selectAllList="bigList" type="multiple" :pageSize="50" placeholder="我有一万条数据哦"></big-select>
+    <big-select  v-model="defaultCheckedList2" :selectAllList="bigList" type="multiple" :pageSize="50" placeholder="我有一万条数据哦"></big-select>
 
   </div>
 </template>

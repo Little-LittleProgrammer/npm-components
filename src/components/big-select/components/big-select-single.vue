@@ -1,50 +1,50 @@
 <template>
     <div class="container" ref="ref-container" :class="size">
-        <div class="select-header" :class="{'focus': selectStyle.length===2}">
+        <div class="select-header" :class="{'focus': selectStyle.length===1}">
             <div class="select-input">
                 <input
+                    :disabled="disabled"
                     type="text"
                     :placeholder="placeholder"
                     v-model="searchData"
-                    :class="size"
                     @input="get_select"
                     @focus="open_select_container"
                     @blur="close_select_container"
                 />
             </div>
             <div class="font-icon">
-                <icon-delete class="clear-all" v-if="searchData !=''" @click="clear_all"></icon-delete>
+                <icon-delete class="clear-all" v-if="!disabled && searchData !=''" @click="clear_all"></icon-delete>
                 <div class="arrow-bottom" :class="{'rotate': rotateFlag}"></div>
             </div>
         </div>
         <div class="select-container" ref="ref-select-container" :class="selectStyle">
             <!-- loading图标通过下拉框是否为空，和loading属性共同判断  -->
-            <div v-show="selectListCache.length === 0 && loading" class="loading-container">
-                <qm-loading :loading="true" size="small"></qm-loading>
-            </div>
-            <div v-show="!(selectListCache.length === 0 && loading)" class="default-select" ref="ref-default-select">
-                <div
-                    v-for="(item,index) in selectList"
-                    :key="index"
-                    class="default-item"
-                    :class="{choose:choose_item(item)}"
-                    @mousedown="add_selected(item)"
-                >
-                    <span>{{item.label}}</span>
+            <q-loading :loading="selectListCache.length === 0 && loading && rotateFlag" size="small">
+                <div v-show="!(selectListCache.length === 0 && loading)" class="default-select" ref="ref-default-select">
+                    <div
+                        v-for="(item,index) in selectList"
+                        :key="index"
+                        class="default-item"
+                        :class="{choose:choose_item(item)}"
+                        @mousedown="add_selected(item)"
+                    >
+                        <span :title="item.label">{{item.label}}</span>
+                    </div>
+                    <div class="spinning" v-if="bottomLoading">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
-                <div class="spinning" v-if="bottomLoading">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
+            </q-loading>
         </div>
     </div>
 </template>
 
 <script>
-import iconDelete from '@/components/vue-icon/icon-delete';
 import methods from '@/assets/js/tools';
+import iconDelete from '@/components/vue-icon/icon-delete';
+
 let timeOut = ''; // 当查询回来数据为空时，避免一直为loading图标
 export default {
     name: 'QmSelectBigData',
@@ -56,7 +56,7 @@ export default {
         },
         size: {
             // 下拉框尺寸,
-            type: Array
+            type: String
         },
         async: {
             // 异步同步，async:异步(分页查找)，sync:同步(一次性全部查找完成)
@@ -72,6 +72,9 @@ export default {
         },
         placeholder: {
             type: String
+        },
+        disabled: {
+            type: Boolean
         }
     },
     components: { iconDelete },
@@ -102,7 +105,7 @@ export default {
                         if (val.length < this.pageSize) {
                             this.bottomLoading = false;
                         } else {
-                        // 防止 immediate 时 val.length = 0,造成this.bottomLoading = false;
+                            // 防止 immediate 时 val.length = 0,造成this.bottomLoading = false;
                             this.bottomLoading = true;
                         }
                     }
@@ -140,15 +143,14 @@ export default {
             oldScrollTop: 0,
             bottomLoading: false,
             searchCache: '',
-            watchFlag: true
+            watchFlag: true // 监听下拉框的打开与关闭，主要用来防止还在请求时关闭下拉框，造成重新打开时，关闭之前请求的数据填充
         };
     },
     mounted() {
         this.scrollPageState.pageSize = this.pageSize;
-        this.selectStyle = [this.size[0]];
     },
     methods: {
-        // 打开搜索框
+    // 打开搜索框
         open_select_container() {
             // 开始吧一些样式定好
             this.selectStyle.push('animation');
@@ -175,9 +177,11 @@ export default {
         },
         // 关闭搜索框
         close_select_container() {
-            this.selectStyle.pop(); // 删除数组第二个值,anmation
+            this.selectStyle.pop(); // 删除数组的值,anmation
             clearInterval(this.interval);
-            this.watchFlag = false; // 监听selectAllList标志
+            if (this.async == 'async') {
+                this.watchFlag = false; // 监听selectAllList标志
+            }
             if (this.selectListCache.length !== 0) {
                 // 如果下拉框有数据
                 // const $domAll = document.getElementsByClassName('default-select')[this.num];
@@ -190,8 +194,8 @@ export default {
         reset_select_list() {
             this.$nextTick(() => {
                 // 防止还是loading时关闭下拉框 ?.
-                const _cache = this.selectListCache.find(item => item.label == this.searchData)?.value ?? '';
-                this.$emit('returnSelectData', _cache);
+                const _cache = this.selectListCache.find((item) => item.label == this.searchData)?.value ?? '';
+                this.$emit('select', _cache);
                 if (!_cache) { // 当内容为空时，重置输入框里的值，防止输入的搜索词搜索不到时，未清空搜索框
                     this.searchData = '';
                 }
@@ -234,7 +238,7 @@ export default {
                 if (this.async == 'sync') {
                     // 判断输入的内容是否为空
                     this.selectListCache = this.selectListCache.filter((item) => {
-                    // 过滤属性
+                        // 过滤属性
                         return String(item.label).indexOf(e.target.value) !== -1;
                     });
                     this.selectList = this.selectListCache.slice(
@@ -271,7 +275,7 @@ export default {
         },
         // 当监测到下拉框下拉到底部时，push新的数据
         change_scroll(e) {
-            const {target} = e;
+            const { target } = e;
             if (this.oldScrollTop < target.scrollTop) {
                 // 防止多次触发下列事件导致 scrollPage 无限增加
                 this.oldScrollTop = Math.max(target.scrollTop, this.oldScrollTop);
@@ -309,7 +313,7 @@ export default {
             const _obj = {
                 page: this.scrollPageState.scrollPage,
                 pageSize: this.scrollPageState.pageSize,
-                text: text};
+                text };
             this.$emit('findSelectList', _obj);
         },
         // 滚动到默认选项入口，以后拓展
@@ -321,53 +325,54 @@ export default {
         // 清空所有数据
         clear_all() {
             this.searchData = '';
-            this.$emit('returnSelectData', this.searchData + '');
+            this.$emit('select', `${this.searchData}`);
         }
     }
 };
 </script>
 
 <style lang="scss" scoped>
-.loading-container {
-    display: flex;
-    align-items: center;
-    height: 110px;
-    justify-content: center;
-}
-
-@each $i in (100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400) {
-    .w-#{($i/2)} {
-        width: ($i / 2)+px;
-    }
-    .h-#{($i/20)} {
-        height: ($i/20)+px;
-    }
-}
 
 .container {
+    vertical-align: middle;
     display: inline-block;
     position: relative;
     text-align: left;
+    width: inherit;
+    * {
+        box-sizing: border-box;
+    }
+}
+.default {
+    height: 32px !important;
+}
+.small {
+    height: 24px !important;
+}
+.large {
+    height: 40px !important;
 }
 .focus {
-    border-color: rgb(66, 160, 251) !important;
-    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    border-color: $primary-color !important;
+    box-shadow: 0 0 0 2px rgba(250, 160, 0, 0.2);
 }
 .select-header {
     border: 1px solid #d9d9d9;
     border-radius: 4px;
     width: 100%;
+    height: inherit;
     display: flex;
     align-items: center;
     padding: 0 3px;
     &:hover {
-        border-color: rgb(66, 160, 251);
+        border-color: $primary-color;
         .clear-all {
             display: block !important;
         }
     }
     .select-input {
         flex: 1;
+        line-height: 1;
         input {
             width: 100%;
             border: 0;
@@ -411,6 +416,7 @@ export default {
     }
 }
 .select-container {
+    width: 100%;
     margin-top: 5px;
     box-shadow: 4px 4px 20px #ccc;
     z-index: 999;
@@ -474,7 +480,7 @@ export default {
                 margin-left: -5px;
                 height: 10px;
                 width: 10px;
-                background-color: #FFA000;
+                background-color: $primary-color;
                 border-radius: 50%;
                 position: absolute;
             }
