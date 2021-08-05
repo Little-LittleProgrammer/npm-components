@@ -667,7 +667,8 @@ methods.htmlTocanvas = (dom, options) => {
         for (const key of css) {
             style += `${key}:${css[key]};`;
         }
-        return style;
+        // 将字符串里的双引号变成单引号，防止赋值style的时候造成混乱
+        return style.replaceAll('\"', '\'');
     }
 
     function getBase64Image(img) { // 获取图片的base64

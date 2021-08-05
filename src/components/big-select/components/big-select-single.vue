@@ -357,7 +357,7 @@ export default {
     box-shadow: 0 0 0 2px rgba(250, 160, 0, 0.2);
 }
 .select-header {
-    border: 1px solid #d9d9d9;
+    border: 1px solid #e8e8e8;
     border-radius: 4px;
     width: 100%;
     height: inherit;
