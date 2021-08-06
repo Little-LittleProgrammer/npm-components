@@ -170,6 +170,7 @@ export default {
     mounted() { // 开始吧一些样式定好
         this.scrollPageState.pageSize = this.pageSize;
         const $dom = this.$refs['ref-container'];
+        console.log($dom.attributes);
         // 复选框的宽度, 当选择框的宽度小于500时，为500，当选择框的宽度大于500时，为选择框的宽度
         const _cache = window.getComputedStyle($dom).width;
         let _num = +_cache.replace(/\D+$/g, '');

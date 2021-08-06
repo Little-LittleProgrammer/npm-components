@@ -137,9 +137,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.home {
-  display: flex;
-  padding: 0 40px;
-  justify-content: space-between;
-}
+// .home {
+//   display: flex;
+//   padding: 0 40px;
+//   justify-content: space-between;
+// }
 </style>

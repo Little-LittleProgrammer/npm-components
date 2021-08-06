@@ -1,6 +1,6 @@
 <template>
   <div id="app" v-cloak>
-    <water-mark name="王叁贰">
+    <q-page-watermark name="王叁贰" size="20px" gap="150">
       <template slot="content">
         <div class="nav-container">
           <div class="nav-left">
@@ -10,22 +10,25 @@
             <router-link to="/">下拉框</router-link> |
             <router-link to="/waterMark">水印图</router-link> |
             <router-link to="/darg-to-recycle">拖拽致回收站</router-link> |
-            <router-link to="/image-zoom">图片放大器</router-link> |
+            <router-link :to="{path:'/image-zoom',query: {name: '图片放大器'}}">图片放大器</router-link> |
             <router-link to="/skeleton">骨架屏</router-link> |
-            <router-link to="/qm-swiper">轮播图</router-link> |
-            <router-link to="/qm-swiper-app">移动端</router-link>
+            <router-link to="/qm-swiper">轮播图</router-link>
           </div>
+        </div>
+        <div class="header">
+           <breadcrumb :routes="$store.state.routes"></breadcrumb>
         </div>
         <router-view/>
       </template>
-    </water-mark>
+    </q-page-watermark>
   </div>
 </template>
 
 <script>
-import waterMark from '@/components/water-mark.vue';
+import QPageWatermark from '@/components/q-page-watermark/index.vue';
+import breadcrumb from '@/components/breadcrumb';
 export default {
-    components: {waterMark}
+    components: {QPageWatermark, breadcrumb}
 };
 </script>
 
@@ -68,6 +71,12 @@ export default {
       }
     }
   }
+}
+.header {
+  border: 1px solid #e8e8e8;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 10px;
 }
 
 @media screen and ( max-width: 375px) {
