@@ -31,8 +31,9 @@ export default {
         return {
             formatMap: undefined, // 格式化后的 route 数据
             breadcrumbList: [],
-            queryCache: [],
-            parentList: []
+            queryCache: {}, // query的缓存
+            parentList: [],
+            index: 0 // 给每个queryCache设置1个id
         };
     },
     computed: {},
@@ -92,22 +93,24 @@ export default {
         create_breadcrumb_list() {
             const _route = this.$route;
             let _cacheObj = {};
-            console.log('formatMap', this.formatMap);
-            console.log('_route', _route);
             if (Object.keys(_route.query).length !== 0) {
-                this.queryCache.push({
-                    path: _route.path,
+                const _fin = _route.path.split('/')[_route.path.split('/').length - 1];
+                // 缓存query, {'opening-ad': {id:1,path: 'opening-ad', query: 't:10021232'}}
+                this.queryCache[_fin] = {
+                    id: this.index++,
+                    path: _fin,
                     query: _route.query
-                });
-                this.delete_wheel(this.queryCache);
+                };
+                // this.delete_wheel(this.queryCache);
             }
-            if (this.queryCache.length > 10) {
-                // 保证queryCache长度为10
-                this.queryCache.splice(0, 1);
+            if (Object.keys(this.queryCache).length > 10) {
+                // 保证 queryCache 里只有10个子节点, 根据id判断, id最小的节点删除
+                const _arr = Object.values(this.queryCache);
+                _arr.sort((a, b) => a.id - b.id);
+                delete this.queryCache[_arr[0].path];
             }
             console.log('queryCache', this.queryCache);
             _cacheObj = this.formatMap.get(this.$route.meta.id);
-            console.log(_cacheObj);
             if (Object.keys(_cacheObj).length > 0) {
                 this.parentList = [];
                 this.find_family(this.formatMap, _cacheObj.pid);
@@ -125,24 +128,23 @@ export default {
                 this.find_family(map, _cacheObj.pid);
             }
         },
-        // 删除 path 重复的
-        delete_wheel(arr) {
-            for (var i = 0; i < arr.length - 1; i++) {
-                for (var j = i + 1; j < arr.length; j++) {
-                    if (arr[i].path == arr[j].path) {
-                        arr.splice(i, 1);
-                        j--;
-                    }
-                }
-            }
-            return arr;
-        },
+        // // 删除 path 重复的
+        // delete_wheel(arr) {
+        //     for (var i = 0; i < arr.length - 1; i++) {
+        //         for (var j = i + 1; j < arr.length; j++) {
+        //             if (arr[i].path == arr[j].path) {
+        //                 arr.splice(i, 1);
+        //                 j--;
+        //             }
+        //         }
+        //     }
+        //     return arr;
+        // },
         // 跳到对应的页面
         jump_page(item, index) {
+            console.log(item);
             if (index !== this.breadcrumbList.length - 1) {
-                const query = this.queryCache.find((e) =>
-                    item.path.split('/')[item.path.split('/').length - 1] == e.path.split('/')[e.path.split('/').length - 1]
-                )?.query;
+                const query = this.queryCache[item.path.split('/')[item.path.split('/').length - 1]]?.query;
                 this.$router.push({
                     name: item.name,
                     query

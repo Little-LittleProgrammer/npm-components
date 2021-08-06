@@ -26,7 +26,7 @@ export function css(dom, key, value) {
      * @param {*} options 配置  宽高：width， height， canvas样式：style
      * @description
      */
-export function htmlTocanvas(dom, options) {
+export function html_to_canvas(dom, options) {
     options = Object.assign({ width: 100, height: 100, style: {} }, options); // 默认样式
     const $canvas = document.createElement('canvas');
     $canvas.id = 'canvas';
