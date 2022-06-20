@@ -1,6 +1,6 @@
 <template>
   <div id="app" v-cloak>
-    <q-page-watermark name="王叁贰" size="20px" gap="150">
+    <q-page-watermark name="王叁贰" size="20px"  gapX="100" gapY="60">
       <template slot="content">
         <div class="nav-container">
           <div class="nav-left">
@@ -15,9 +15,6 @@
             <router-link to="/qm-swiper">轮播图</router-link>
           </div>
         </div>
-        <div class="header">
-           <breadcrumb :routes="$store.state.routes"></breadcrumb>
-        </div>
         <router-view/>
       </template>
     </q-page-watermark>
@@ -26,9 +23,8 @@
 
 <script>
 import QPageWatermark from '@/components/q-page-watermark/index.vue';
-import breadcrumb from '@/components/breadcrumb';
 export default {
-    components: {QPageWatermark, breadcrumb}
+    components: {QPageWatermark}
 };
 </script>
 
@@ -39,6 +35,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  height: 100%;
 }
 [v-cloak]{
     display: none;

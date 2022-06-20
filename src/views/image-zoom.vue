@@ -15,7 +15,7 @@ export default {
     methods: {
         init_image() {
             var app = document.getElementById('image');
-            Methods.imageZoom(app, 'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1936934555,1071348084&fm=26&gp=0.jpg', 200, 200);
+            Methods.imageZoom(app, require('../assets/images/forbidden.jpg'), 200, 200);
         }
     }
 };

@@ -1,6 +1,6 @@
 <template>
-    <div class="watermark-container" ref="ref-watermark">
-        <div ref="ref-js-qm-watermark" class="qm-watermark">
+    <div class="watermark-container" ref="ref-watermark-container">
+        <div ref="ref-watermark" class="watermark">
             <span >{{name}}</span>
         </div>
         <slot :name="content">
@@ -22,9 +22,13 @@ export default {
             type: String,
             default: ''
         },
-        gap: { // 水印之间的距离，根据中心距离计算
+        gapX: { // 水印之间的距离，根据中心距离计算
             type: String,
-            default: '150'
+            default: '80px'
+        },
+        gapY: { // 水印之间的距离，根据中心距离计算
+            type: String,
+            default: '50px'
         },
         size: { // 字体大小
             type: String,
@@ -59,24 +63,37 @@ export default {
             handler(val) {
                 if (val) {
                     this.$nextTick(() => { // 防止获取name时，dom还没渲染出来
-                        const $dom = this.$refs['ref-js-qm-watermark'];
+                        const $dom = this.$refs['ref-watermark'];
+                        // 判断插槽里是否有元素
+                        const $content = this.$slots.content;
                         css($dom.children[0], {
-                            width: this.gap + 'px',
-                            height: this.gap + 'px',
-                            'line-height': this.gap + 'px',
                             transform: `rotate(${this.rotate})`,
                             'font-size': this.size,
                             color: this.color,
                             opacity: this.opacity
                         });
-                        // 判断插槽里是否有元素
-                        const $content = this.$slots.content;
                         if ($content) {
-                            const option = { // 配置canvas的样式
-                                width: this.gap,
-                                height: this.gap
+                            const _sizeObj = {
+                                width: parseInt(window.getComputedStyle($dom).width),
+                                height: parseInt(window.getComputedStyle($dom).height)
                             };
-                            html_to_canvas($dom, option).then(($canvas) => {
+                            const _rotate = Math.abs(parseInt(this.rotate));
+                            const option = { // 配置canvas的样式
+                                width: _sizeObj.height * Math.sin(_rotate * Math.PI / 180) + Math.cos(_rotate * Math.PI / 180) * _sizeObj.width,
+                                height: _sizeObj.height * Math.cos(_rotate * Math.PI / 180) + Math.sin(_rotate * Math.PI / 180) * _sizeObj.width
+                            };
+                            css($dom, {
+                                width: option.width + parseInt(this.gapX) + 'px',
+                                height: option.height + parseInt(this.gapY) + 'px'
+                            });
+                            css($dom.children[0], {
+                                lineHeight: option.height + parseInt(this.gapY) + 'px'
+                            });
+                            const _canvasOption = {
+                                width: option.width + parseInt(this.gapX),
+                                height: option.height + parseInt(this.gapY)
+                            };
+                            html_to_canvas($dom, _canvasOption).then(($canvas) => {
                                 // 监听元素
                                 const $parentNode = $dom.parentNode;
                                 this.backgroundImage = $canvas.toDataURL('image/jpg');
@@ -123,13 +140,12 @@ export default {
             // 创建一个观察器实例并传入回调函数
             const observer = new MutationObserver(_callback);
             // 以上述配置开始观察目标节点
-            observer.observe(this.$refs['ref-watermark'], _config);
+            observer.observe(this.$refs['ref-watermark-container'], _config);
         },
         listen_css($dom) { // 监听元素的css变化
             const _callback = (mutationsList, observer) => { // 监听css变化, 防止去除canvas标签
                 mutationsList.forEach((mutation) => {
                     if (mutation.type == 'attributes' && mutation.attributeName === 'style') {
-                        console.log('css changed', mutation);
                         css($dom, {
                             display: 'block',
                             opacity: '1',
@@ -148,7 +164,6 @@ export default {
                         });
                     }
                     if (mutation.type == 'attributes' && mutation.attributeName === 'class') {
-                        console.log('className changed', mutation);
                         this.content = '';
                         // 停止观察
                         observer.disconnect();
@@ -168,17 +183,16 @@ export default {
 <style lang="scss" scoped>
 .watermark-container {
     position: relative;
-    .qm-watermark { // 水印
+    height: 100%;
+    .watermark { // 水印
+        text-align: center;
         font-family: Cursive, serif;
-        overflow: hidden;
+        // overflow: hidden;
         display: inline-block;
         span {
-            line-height: 50px;
             margin: 0 auto;
             display: inline-block;
-            height: 50px;
-            width: 50px;
-            transform: rotate(-30deg);
+            transform-origin: 50% 50%;
         }
     }
     .error-warning {

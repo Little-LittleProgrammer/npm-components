@@ -72,65 +72,69 @@ export function html_to_canvas(dom, options) {
 
     async function render_dom(element, isTop) { // 递归调用获取子标签
         const tag = element.tagName.toLowerCase();
-        let str = `<${tag} `;
-        let flag = true;
+        let _str = `<${tag} `;
+        let _flag = true;
         // 最外层的节点要加xmlns命名空间
-        isTop && (str += `xmlns="http://www.w3.org/1999/xhtml" `);
-        if (str === '<img ') { // img标签特殊处理
-            flag = false;
+        isTop && (_str += `xmlns="http://www.w3.org/1999/xhtml" `);
+        if (_str === '<img ') { // img标签特殊处理
+            _flag = false;
             let base64Img = '';
             if (element.src.length > 30000) { // 判断src属性是不是base64， 是的话不用处理，不是的话，转换base64
                 base64Img = element.src;
             } else {
                 base64Img = await get_base64_image(element.src);
             }
-            str += `src="${base64Img}" style="${get_element_styles(element)}" />\n`;
-        } else if (str.includes('svg') || str.includes('path')) {
-            flag = false;
-            str = '';
+            _str += `src="${base64Img}" style="${get_element_styles(element)}" />\n`;
+        } else if (_str.includes('svg') || _str.includes('path')) {
+            _flag = false;
+            _str = '';
         } else {
-            str += `style="${get_element_styles(element)}">\n`;
+            _str += `style="${get_element_styles(element)}">\n`;
         }
         if (element.children.length) {
             for (const el of element.children) {
-                str += await render_dom(el);
+                _str += await render_dom(el);
             }
         } else {
-            str += element.innerHTML;
+            _str += element.innerHTML;
         }
-        if (flag) {
-            str += `</${tag}>\n`;
+        if (_flag) {
+            _str += `</${tag}>\n`;
         }
-        return str;
+        return _str;
     }
 
     function get_element_styles(element) { // 获取标签的所有样式
-        const css = window.getComputedStyle(element);
-        let style = '';
-        for (const key of css) {
+        let _css = '';
+        // 能力检测
+        _css = window.getComputedStyle(element);
+        let _style = '';
+        for (const key of _css) {
+            // 排除无用样式
             if (key === '-webkit-locale') {
-                style += '';
+                _style += '';
             } else {
-                style += `${key}:${css[key]};`;
+                _style += `${key}:${_css[key]};`;
             }
         }
-        return style;
+        // 将字符串里的双引号变成单引号，防止赋值style的时候造成混乱
+        return _style.replace(/\"/g, '\'');
     }
 
     function get_base64_image(img) { // 获取图片的base64
-        const image = new Image();
-        image.src = img;
+        const _image = new Image();
+        _image.src = img;
         return new Promise(resolve => {
-            image.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.id = 'image';
-                canvas.width = image.width;
-                canvas.height = image.height;
-                const ctxImg = canvas.getContext('2d');
-                ctxImg.drawImage(image, 0, 0, image.width, image.height);
-                const ext = image.src.substring(image.src.lastIndexOf('.') + 1).toLowerCase();
-                const dataURL = canvas.toDataURL('image/' + ext);
-                resolve(dataURL);
+            _image.onload = function() {
+                const $canvas = document.createElement('canvas');
+                $canvas.id = 'image';
+                $canvas.width = _image.width;
+                $canvas.height = _image.height;
+                const ctxImg = $canvas.getContext('2d');
+                ctxImg.drawImage(_image, 0, 0, _image.width, _image.height);
+                const _ext = _image.src.substring(_image.src.lastIndexOf('.') + 1).toLowerCase();
+                const _dataURL = $canvas.toDataURL('image/' + _ext);
+                resolve(_dataURL);
             };
         });
     }

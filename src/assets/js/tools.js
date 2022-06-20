@@ -161,7 +161,6 @@ methods.formatTime = function(format, date) {
     const y = format.indexOf('y');
     const m = format.indexOf('m');
     const d = format.indexOf('d');
-    console.log(y, m, d);
     let returnResult = '';
     switch (true) {
         case y !== -1:
@@ -401,7 +400,6 @@ methods.ajax = function(options) {
         // 数据放在query上
         options.url += '?' + options.data;
     }
-    console.log(options);
     // 返回promise规范
     return new Promise((resolve, reject) => {
         // 1、创建ajax对象
@@ -448,7 +446,6 @@ methods.serialize = function(form) {
     // 定义结果
     let str = '';
     // 遍历表单控件
-    console.log(form.elements);
     Array.from(form.elements, item => {
         // 获取具有name字段的表单控件值
         if (item.name) {

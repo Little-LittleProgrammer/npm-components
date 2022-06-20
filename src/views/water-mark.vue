@@ -243,7 +243,6 @@ export default {
             Methods.htmlTocanvas($dom, option).then(($canvas) => {
                 this.exportDisabled = false;
                 this.url = $canvas.toDataURL('image/png');
-                console.log(this.url);
             });
         },
 

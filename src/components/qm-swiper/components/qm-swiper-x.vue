@@ -231,11 +231,9 @@ export default {
                 this.clear_interval();
                 if (this.index < e.target.id) {
                     this.index = e.target.id === 0 ? 1 : +e.target.id - 1; // 边界判断， 因为动画方法中会对index进行加减法，所以要加减1
-                    console.log(this.index);
                     this.animate_img(this.start_time, 'right');
                 } else if (this.index > e.target.id) {
                     this.index = e.target.id === this.imgList.length - 1 ? this.imgList.length - 2 : +e.target.id + 1;
-                    console.log(this.index);
                     this.animate_img(this.start_time, 'left');
                 }
             }

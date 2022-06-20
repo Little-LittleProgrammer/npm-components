@@ -26,14 +26,12 @@ export default {
             // 为所有元素绑定事件按
             for (let i = 0; i < imgs.length; i++) {
                 imgs[i].ondragstart = function(e) {
-                    console.log(e);
                     e.dataTransfer.setData('domId', i);
                 };
             }
             // 丢弃到垃圾桶
             trash.ondrop = (e) => {
                 const domId = 'a' + e.dataTransfer.getData('domId');
-                console.log(domId);
                 this[domId] = false;
             };
             // 让ondrop事件生效

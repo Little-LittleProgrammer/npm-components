@@ -20,20 +20,24 @@
         <div class="select-container" ref="ref-select-container" :class="selectStyle">
             <!-- loading图标通过下拉框是否为空，和loading属性共同判断  -->
             <q-loading :loading="selectListCache.length === 0 && loading && rotateFlag" size="small">
-                <div v-show="!(selectListCache.length === 0 && loading)" class="default-select" ref="ref-default-select">
-                    <div
-                        v-for="(item,index) in selectList"
-                        :key="index"
-                        class="default-item"
-                        :class="{choose:choose_item(item)}"
-                        @mousedown="add_selected(item)"
-                    >
-                        <span :title="item.label">{{item.label}}</span>
-                    </div>
-                    <div class="spinning" v-if="bottomLoading">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                <div v-show="!(selectListCache.length === 0 && loading)" class="default-select" ref="ref-default-select"  >
+                    <div :style="'height:'+getScrollH">
+                        <div :style="`transform:translateY(${offSetY}px); `">
+                            <div
+                                v-for="(item,index) in selectList"
+                                :key="index"
+                                class="default-item"
+                                :class="{choose:choose_item(item)}"
+                                @mousedown="add_selected(item)"
+                            >
+                                <span :title="item.label">{{item.label}}</span>
+                            </div>
+                        </div>
+                        <div class="spinning" v-if="bottomLoading">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
                     </div>
                 </div>
             </q-loading>
@@ -42,8 +46,9 @@
 </template>
 
 <script>
-import methods from '@/assets/js/tools';
-import iconDelete from '@/components/vue-icon/icon-delete';
+import iconDelete from '../../vue-icon/icon-delete.vue';
+import methods from '../tools/index';
+import QLoading from '../../q-loading';
 
 let timeOut = ''; // 当查询回来数据为空时，避免一直为loading图标
 export default {
@@ -77,8 +82,15 @@ export default {
             type: Boolean
         }
     },
-    components: { iconDelete },
-    computed: {},
+    components: { iconDelete, QLoading },
+    computed: {
+        getScrollH() { // 列表总高度
+            if (this.async == 'async') {
+                return 300;
+            }
+            return this.itemH * this.selectListCache.length + 'px';
+        }
+    },
     watch: {
         selectAllList: {
             // 监听下拉框数据
@@ -94,9 +106,10 @@ export default {
                             this.loading = false; // 超过5秒，loading取消
                         }, 5000);
                         // 同步时的方法
-                        // _selectList是全部的缓存，selectList是筛选到的要渲染的list，selectAllList就是全部，主要用于考虑异步与搜索
-                        this.selectListCache = val;
-                        this.selectList = val.slice(0, this.scrollPageState.pageSize);
+                        // selectListCache是全部的缓存，selectList是筛选到的要渲染的list，selectAllList就是全部，主要用于考虑异步与搜索
+                        this.selectListCache = val || [];
+                        this.showNum = this.viewH / this.itemH + 4;
+                        this.selectList = this.selectListCache.slice(0, this.showNum);
                         // 默认值
                         this.searchData = val.find((item) => item.value == this.defaultChecked)?.label ?? '';
                     } else {
@@ -140,14 +153,24 @@ export default {
             rotateFlag: false, // 箭头旋转
             $domAll: '',
             interval: '',
-            oldScrollTop: 0,
+            oldBottomScrollTop: 0, // 为了防止无限触底导致
             bottomLoading: false,
-            searchCache: '',
-            watchFlag: true // 监听下拉框的打开与关闭，主要用来防止还在请求时关闭下拉框，造成重新打开时，关闭之前请求的数据填充
+            searchCache: '', // 异步情况下的发送通讯搜索缓存
+            watchFlag: true, // 监听下拉框的打开与关闭，主要用来防止还在请求时关闭下拉框，造成重新打开时，关闭之前请求的数据填充
+
+            offSetY: 0, // 动态偏移量
+            itemH: 30, // 列表单行高度
+            showNum: 0, // 显示的个数
+            viewH: 300 // 可视区域高度
         };
     },
     mounted() {
         this.scrollPageState.pageSize = this.pageSize;
+        if (this.async === 'async') {
+            this.showNum = this.pageSize;
+        } else {
+            this.showNum = this.viewH / this.itemH + 4;
+        }
     },
     methods: {
     // 打开搜索框
@@ -160,18 +183,15 @@ export default {
             if (this.async === 'async') {
                 this.async_search_list();
             }
-            if (this.$domAll) {
-                this.update_scroll(this.$domAll, 0);
-            }
             this.interval = setInterval(() => {
-                console.log('interval');
                 this.$domAll = this.$refs['ref-default-select'];
                 if (this.selectListCache.length !== 0) {
                     // 当有数据时，开启监听,并关闭循环
                     this.listen_select_scroll();
-                    console.log('clearInterval');
                     clearInterval(this.interval);
-                    this.$domAll && this.update_scroll(this.$domAll, 0); // 再次置顶
+                    if (this.async == 'sync' && this.defaultChecked) {
+                        this.scroll_to_default();
+                    }
                 }
             }, 500);
         },
@@ -216,17 +236,19 @@ export default {
         // 重置操作
         reset_value() {
             this.scrollPageState.scrollPage = 0;
-            this.oldScrollTop = 0;
+            this.oldBottomScrollTop = 0;
             this.searchCache = '';
             if (this.async === 'sync') {
                 this.selectListCache = this.selectAllList;
-                this.selectList = this.selectAllList.slice(0, this.scrollPageState.pageSize);
+                this.selectList = this.selectListCache.slice(0, this.showNum);
+                this.offSetY = 0;
             } else {
                 this.bottomLoading = true;
                 setTimeout(() => {
                     this.selectListCache = [];
                 }, 300);
             }
+            methods.update_scroll(this.$domAll, 0);
         },
 
         // 搜索
@@ -243,7 +265,7 @@ export default {
                     });
                     this.selectList = this.selectListCache.slice(
                         0,
-                        this.scrollPageState.pageSize
+                        this.showNum
                     ); // 并按照分页裁剪
                 } else {
                     this.searchCache = e.target.value;
@@ -258,6 +280,7 @@ export default {
                 }
             }
         },
+
         // 监听滚动事件
         listen_select_scroll() {
             this.$domAll.addEventListener('scroll', this.listen_scroll);
@@ -270,38 +293,36 @@ export default {
             this.scrollLock = true;
             window.requestAnimationFrame(() => { // requestAnimationFrame 保证高频事件每一帧只执行一次
                 this.scrollLock = false;
-                this.change_scroll(e);
+                if (this.async === 'sync') {
+                    this.handle_sync_scroll(e);
+                } else {
+                    this.change_async_scroll(e);
+                }
             });
         },
+        // 同步情况下的虚拟滚动
+        handle_sync_scroll(e) {
+            this.offSetY = e.target.scrollTop - (e.target.scrollTop % this.itemH); // 设置动态偏移量模拟滚动
+            this.selectList = this.selectListCache.slice(
+                Math.floor(e.target.scrollTop / this.itemH),
+                Math.floor(e.target.scrollTop / this.itemH) + this.showNum
+            ); // 根据滚动条高度来截取需要展示的列表区间
+        },
         // 当监测到下拉框下拉到底部时，push新的数据
-        change_scroll(e) {
+        change_async_scroll(e) {
             const { target } = e;
-            if (this.oldScrollTop < target.scrollTop) {
-                // 防止多次触发下列事件导致 scrollPage 无限增加
-                this.oldScrollTop = Math.max(target.scrollTop, this.oldScrollTop);
+            if (this.oldBottomScrollTop < target.scrollTop) {
+                // 防止多次触发滚动事件导致 scrollPage 无限增加
+                this.oldBottomScrollTop = Math.max(target.scrollTop, this.oldBottomScrollTop);
                 if (
-                    target.clientHeight ==
-                target.scrollHeight - target.scrollTop
+                    target.clientHeight == target.scrollHeight - target.scrollTop
                 ) {
                     this.scrollPageState.scrollPage += 1;
-                    if (this.async === 'sync') {
-                        this.selectList = [
-                            ...this.selectList,
-                            ...this.selectListCache.slice(
-                                this.scrollPageState.scrollPage *
-                                this.scrollPageState.pageSize,
-                                (this.scrollPageState.scrollPage + 1) *
-                                this.scrollPageState.pageSize
-                            )
-                        ];
-                    } else {
-                        this.async_search_list(this.searchCache);
-                    }
+                    this.async_search_list(this.searchCache);
                 }
             }
         },
-
-        // 同步情况下的通讯
+        // 异步情况下的通讯
         async_search_list(text) {
             methods.throttle_event(this.send_message, {
                 time: 800,
@@ -316,11 +337,14 @@ export default {
                 text };
             this.$emit('findSelectList', _obj);
         },
-        // 滚动到默认选项入口，以后拓展
-        update_scroll(dom, num) {
-            /* this.scrollPageState.scrollPage = Math.floor((num + 1 + 10) / 10);
-            this. */
-            dom.scrollTop = num * 30;
+        // 拥有默认值时,自动滚到默认值上, 目前仅同步时有效
+        scroll_to_default() {
+            // oldBottomScrollTop, padding, scrollPage
+            const _index = this.selectListCache.findIndex(item => item.value == this.defaultChecked);
+            this.handle_sync_scroll({target: {
+                scrollTop: _index * this.itemH
+            }});
+            methods.update_scroll(this.$domAll, _index, this.itemH);
         },
         // 清空所有数据
         clear_all() {
@@ -357,7 +381,7 @@ export default {
     box-shadow: 0 0 0 2px rgba(250, 160, 0, 0.2);
 }
 .select-header {
-    border: 1px solid #e8e8e8;
+    border: 1px solid #d9d9d9;
     border-radius: 4px;
     width: 100%;
     height: inherit;
@@ -418,7 +442,7 @@ export default {
 .select-container {
     width: 100%;
     margin-top: 5px;
-    box-shadow: 4px 4px 20px #ccc;
+    box-shadow: 4px 4px 20px #e8e8e8;
     z-index: 999;
     transition: all 0.5s;
     max-height: 0px;
@@ -434,8 +458,9 @@ export default {
         opacity: 1;
     }
     .default-select {
-        max-height: 290px;
+        max-height: 300px;
         overflow: auto;
+        scroll-behavior: smooth;
         .default-item {
             text-overflow: ellipsis;
             overflow: hidden;

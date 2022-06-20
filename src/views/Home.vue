@@ -101,7 +101,6 @@ export default {
     },
     async mounted() {
         setTimeout(() => {
-            console.log('1');
             this.list = _list;
             const _listbig = new Array(10000).fill({label: '1', value: '1'});
             this.bigList = _listbig.map(item => {
@@ -118,18 +117,14 @@ export default {
     },
     methods: {
         abc() {
-            console.log(this.defaultChecked);
-            console.log(this.defaultCheckedList);
         },
         getRandom(num){
             var random = Math.floor((Math.random() + Math.floor(Math.random() * 9 + 1)) * Math.pow(10, num - 1));
             return random;
         },
         get_list(obj) {
-            console.log(obj);
             setTimeout(() => {
                 this.listAsync = _list.filter(item => item.label.includes(obj.text)).slice(obj.page * obj.pageSize, (obj.page + 1) * obj.pageSize);
-                console.log('12', this.listAsync);
             }, 2000);
         }
     }

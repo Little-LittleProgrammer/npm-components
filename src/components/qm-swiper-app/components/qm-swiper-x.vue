@@ -64,7 +64,6 @@ export default {
                         const _data = val.replace('%', '');
                         this.containerWidth = 'w-p-' + _data;
                         _img.onload = (e) => {
-                            console.log(this.container.clientWidth, e.path[0].height / 2, e.path[0].width / 2);
                             this.containerHeight = {
                                 height: (this.container.clientWidth * (e.path[0].height / 2) / (e.path[0].width / 2)) + 'rem'
                             };

@@ -41,7 +41,10 @@ export default {
         selectAllList: {
             // 下拉框数据
             type: Array,
-            require: true
+            require: true,
+            default: () => {
+                return [];
+            }
         },
         type: {
             // 下拉框类型：单选'default'，多选'multiple'
